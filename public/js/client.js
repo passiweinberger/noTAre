@@ -13,6 +13,11 @@ var db, remoteCouch;
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
 // var remoteCouch = cloudant_url + roomID;
 
+var syncDom = document.getElementById('sync-wrapper');
+//var newChatName = document.getElementById('chat-name');
+//var newChatMessage = document.getElementById('chat-message');
+//var addMessageButton = document.getElementById('new-message-button'); 
+
 function makeCouchDB(lectureID) {
   db = new PouchDB(lectureID);
   remoteCouch = cloudant_url + lectureID + '';
