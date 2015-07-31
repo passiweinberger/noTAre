@@ -1,6 +1,5 @@
-// JavaScript - Methodenerweiterung der String-Klasse
-// String s an Stelle idx einfügen und rem Zeichen löschen.
-// rem normalerweise immer = 0
+var typer = require('./getType.js');
+
 String.prototype.splice = function( idx, rem, s ) {
     return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
 };
@@ -9,6 +8,7 @@ String.prototype.splice = function( idx, rem, s ) {
 var insertString1 = "<a href=\"";
 var insertString2 = "\"  target=\"_blank\">";
 var insertString3 = "</a>";
+var xmlhttp = new XMLHttpRequest();
  
 // JavaScript-Methode - URLs im Text zu Hyperlinks machen
 function parseTextToLinks(text){
@@ -48,8 +48,8 @@ module.exports = {
 	handlelink: function(text){
 		var parsed = parseTextToLinks(text);
 		if (parsed.indexOf('<a href=\"') != -1){
-			var link = parsed.slice(parsed.indexOf('<a href=\"') + 10,parsed.indexOf('\"  target=\"_blank\"'));
-			var type = gettype(link);
+			var link = parsed.slice(parsed.indexOf('<a href=\"') + 9,parsed.indexOf('\"  target=\"_blank\"'));
+			var type = typer.gettype(link);
 			switch(type) {
  				case 'bild':
      		   		return parsed + "<a href='"+link+"'><img src='"+link+"'></img></a>";
@@ -58,7 +58,20 @@ module.exports = {
         			return parsed + "<a href='"+link+"'><img src='TODO'></img></a>";
         		break;
         	    case 'seite':
-        			return parsed;
+        	        var arr = link.split("/");
+        	        var result = arr[2];
+        	        var title = "http://textance.herokuapp.com/title/" + result;
+        	        xmlhttp.onreadystatechange = function()
+ 					{
+  					if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+   						{
+  				 			title = xmlhttp.responseText;
+  						}
+ 					}
+        	        xmlhttp.open("GET",title,true);
+      				xmlhttp.send();
+        	        var icon = "https://plus.google.com/_/favicon?domain=" + link;
+        			return "<a href='"+link+"'><img src='"+icon+"'></img></a>" + title + " :" + parsed;
         		break;
 			}
 		}
