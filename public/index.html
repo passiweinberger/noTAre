@@ -6,13 +6,15 @@
   <link rel="stylesheet" href="components/font-awesome/css/font-awesome.css">
   <link rel="stylesheet" href="css/flags.css">
   <link rel="stylesheet" href="css/app.css">
+  <link rel="stylesheet" href="css/sync.css">
+  <script src="js/pouchdb-3.6.0.min.js"></script>
 </head>
 <body>
   <div class="main col-md-6 col-md-offset-3">
     <div class="alert alert-danger" id="errors"></div>
     <div id="login-screen">
       <p class="lead">Your collaborative and smart notepad for lectures and more!</p>
-      <p>Please enter your name below and click 'Join' or hit the 'Enter' key.</p>
+      <p>Please enter a username below and click 'Join' or hit the 'Enter' key.</p>
         <form class="form-inline" id="nameForm">
           <div class="form-group">
             <input type="text" class="form-control input-lg" placeholder="Your name" id="name">
@@ -42,8 +44,8 @@
               Actions <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="#" name="createRoom" data-toggle="modal" data-target="#roomModal">Create room</a></li>
-              <li><a href="#" name="leave" id="leave">Leave current room</a></li>
+              <li><a href="#" name="createRoom" data-toggle="modal" data-target="#roomModal">Create a new lecture session!</a></li>
+              <li><a href="#" name="leave" id="leave">Leave current session</a></li>
               <!--<li><a href="#" name="disconnect" id="disconnect">Disconnect from chat</a></li>-->
             </ul>
           </div>
@@ -64,12 +66,12 @@
           <h4 class="modal-title" id="createRoomLabel">Create room</h4>
         </div>
         <div class="modal-body">
-          You can create a chat room here. Names have to be unique.
+          You can create a lecture session here. Names have to be unique.
           <form class="form-inline" id="createRoomForm"><input type="text" class="form-control input-lg"  placeholder="Room name" id="createRoomName"></form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Close</button>
-          <button data-dismiss="modal" id="createRoomBtn" class="btn btn-success btn-lg">Create room</button>
+          <button data-dismiss="modal" id="createRoomBtn" class="btn btn-success btn-lg">Create session</button>
         </div>
       </div>
     </div>
