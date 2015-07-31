@@ -6,7 +6,121 @@
 //WebSpeech API
 var final_transcript = '';
 var recognizing = false;
-// var lastmessages = []; // to be populated later
+var lastmessages = []; // to be populated later
+var db, remoteCouch;
+
+//IMPORTANT: CONFIGURE remoteCouch with your own details
+var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
+// var remoteCouch = cloudant_url + roomID;
+
+function makeCouchDB(lectureID) {
+  db = new PouchDB(lectureID);
+  remoteCouch = cloudant_url + lectureID + '';
+  db.info(function(err, info) {
+      /*
+      db.changes({
+          since: info.update_seq,
+          continuous: true,
+          onChange: readMessages
+      });
+      */
+  });
+  if (remoteCouch) {
+    sync();
+  }
+}
+function syncError() {
+      console.log('data-sync-error');
+      syncDom.setAttribute('data-sync-state', 'error');
+} 
+function sync() {
+      syncDom.setAttribute('data-sync-state', 'syncing');
+      var opts = {continuous: true, complete: syncError};
+      db.replicate.to(remoteCouch, opts);
+      db.replicate.from(remoteCouch, opts);
+}
+
+function exportToCsv(filename, rows) {
+        // var msgObj = 'At' + nowTime + ' by ' + $("#name") + ': ' + msg;
+        var processRow = function (row) {
+            var finalVal = '';
+            for (var j = 0; j < row.length; j++) {
+                var innerValue = row[j] === null ? '' : row[j].toString();
+                //if (row[j] instanceof Date) {
+                //    innerValue = row[j].toLocaleString();
+                //};
+                var result = innerValue.replace(/"/g, '""');
+                if (result.search(/("|,|\n)/g) >= 0)
+                    result = '"' + result + '"';
+                if (j > 0)
+                    finalVal += ',';
+                finalVal += result;
+            }
+            return finalVal + '\n';
+        };
+
+        var csvFile = '';
+        for (var i = 0; i < rows.length; i++) {
+            csvFile += processRow(rows[i]);
+        }
+
+        var blob = new Blob([csvFile], { type: 'text/csv;charset=utf-8;' });
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, filename);
+        } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) { // feature detection
+                // Browsers that support HTML5 download attribute
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+}
+
+function downloadMessages(roomName) {
+  db.allDocs({include_docs: true, descending: true}, function(err, doc) {
+    if (!err) {
+      // write messages to file: TODO
+      var filename = '' + roomName + '.csv';
+      // var msgObj = 'At' + nowTime + ' by ' + $("#name") + ': ' + msg;
+      exportToCsv(filename, doc.rows);
+    } else {
+      console.log(err);
+    }
+  });
+}
+
+function readMessages() {
+  db.allDocs({include_docs: true, descending: true}, function(err, doc) {
+    redrawUI(doc.rows);
+  });
+}
+
+
+function redrawChat(messages) {
+    var ul = document.getElementById('msgs');
+    ul.innerHTML = '';
+    messages.forEach(function(message) {
+        var li=document.createElement("li");
+        var pName = document.createElement("p");
+        var pMessage = document.createElement("p");
+
+        pName.textContent = message.doc.name;
+        pMessage.textContent = message.doc.content;
+        pName.className = "text-danger";
+
+        li.appendChild(pName);
+        li.appendChild(pMessage);
+        li.className = "list-group-item";
+        ul.appendChild(li);
+    });
+}
+
 
 if (!('webkitSpeechRecognition' in window)) {
   console.log("webkitSpeechRecognition is not available");
@@ -79,9 +193,47 @@ function timeFormat(msTime) {
     zeroPad(d.getSeconds(), 2) + " ";
 }
 
+// -- Ajax Get Function -- 
+function ajaxGet(docUrl, func) { 
+  $.ajax({ // Start AJAX Call 
+      url: docUrl, 
+      xhrFields: { withCredentials: true }, 
+      type: "GET", 
+      error: errorHandler, 
+      complete: completeHandler 
+    }).done(func); 
+}
+function errorHandler(jqXHR, textStatus, errorThrown) {
+  console.log(errorThrown);
+  //$.JSONView(jqXHR, $('#output-data'));
+}
+function completeHandler(jqXHR, textStatus, errorThrown) {
+  console.log(errorThrown)
+  //$.JSONView(jqXHR, $('#output-data'));
+}
+
+/*
+function check(roomName) {
+  var doc;
+  ajaxGet(cloudant_url + roomName + '', function(response) {
+    doc = JSON.parse(response); 
+  });
+  try { 
+    if (doc.error == "Database not found!") {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  catch(err) {
+    return true;
+  }
+}
+*/
+
 $(document).ready(function() {
   // setup "global" variables first
-  var socket = io.connect("127.0.0.1:3000"); //"{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); or 127.0.0.1:3000
+  var socket =  io(); // io.connect("{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); // process.env.CF_INSTANCE_ADDR // "75.126.81.66:3000" or for local runs: 127.0.0.1:3000
   var myRoomID = null;
 
   $("form").submit(function(event) {
@@ -135,10 +287,28 @@ $(document).ready(function() {
 
   //main chat screen
   $("#chatForm").submit(function() {
-    var msg = $("#msg").val();
-    if (msg !== "") {
-      socket.emit("send", new Date().getTime(), msg);
-      $("#msg").val("");
+    if (myRoomID !== null) {
+      var msg = $("#msg").val();
+      if (msg !== "") {
+        var nowTime = new Date().getTime();
+        socket.emit("send", nowTime, msg);
+        // insert to couchDB: TODO
+        var msgObj = 'At' + nowTime + ' by ' + $("#name") + ': ' + msg;
+            db.put(msgObj, function callback(err, result) {
+            if (!err) {
+              console.log('Successfully uploaded to couchDB!');
+              //$.JSONView(result, $("#output-resp"));
+            } else {
+              console.log(err);
+            }
+        });
+        $("#msg").val("");
+      }
+    } else {
+      $("#errors").empty();
+      $("#errors").show();
+      $("#errors").append("You have to be in a session to chat!");
+      $("#createRoom").show();
     }
   });
 
@@ -153,7 +323,7 @@ $(document).ready(function() {
 
   $("#msg").keypress(function(e){
     if (e.which !== 13) {
-      if (typing === false && myRoomID !== null && $("#msg").is(":focus")) {
+      if (myRoomID !== null && $("#msg").is(":focus")) {
         typing = true;
         socket.emit("typing", true);
       } else {
@@ -174,30 +344,6 @@ $(document).ready(function() {
     }
   });
 
-
-/*
-  $("#msg").keypress(function(){
-    if ($("#msg").is(":focus")) {
-      if (myRoomID !== null) {
-        socket.emit("isTyping");
-      }
-    } else {
-      $("#keyboard").remove();
-    }
-  });
-
-  socket.on("isTyping", function(data) {
-    if (data.typing) {
-      if ($("#keyboard").length === 0)
-        $("#updates").append("<li id='keyboard'><span class='text-muted'><i class='fa fa-keyboard-o'></i>" + data.person + " is typing.</li>");
-    } else {
-      socket.emit("clearMessage");
-      $("#keyboard").remove();
-    }
-    console.log(data);
-  });
-*/
-
   $("#showCreateRoom").click(function() {
     $("#createRoomForm").toggle();
   });
@@ -205,20 +351,23 @@ $(document).ready(function() {
   $("#createRoomBtn").click(function() {
     var roomExists = false;
     var roomName = $("#createRoomName").val();
-    socket.emit("check", roomName, function(data) {
-      roomExists = data.result;
-       if (roomExists) {
-          $("#errors").empty();
-          $("#errors").show();
-          $("#errors").append("Room <i>" + roomName + "</i> already exists");
-        } else {      
-        if (roomName.length > 0) { //also check for roomname
-          socket.emit("createRoom", roomName);
-          $("#errors").empty();
-          $("#errors").hide();
+    //if (check(roomName)) {
+      socket.emit("check", roomName, function(data) {
+        roomExists = data.result;
+         if (roomExists) {
+            $("#errors").empty();
+            $("#errors").show();
+            $("#errors").append("Session <i>" + roomName + "</i> already currently runs, please join it!");
+          } else {      
+          if (roomName.length > 0) { //also check for roomname
+            makeCouchDB(roomName);
+            socket.emit("createRoom", roomName);
+            $("#errors").empty();
+            $("#errors").hide();
+            }
           }
-        }
     });
+    //}
   });
 
   $("#rooms").on('click', '.joinRoomBtn', function() {
@@ -238,6 +387,11 @@ $(document).ready(function() {
     var roomID = myRoomID;
     socket.emit("leaveRoom", roomID);
     $("#createRoom").show();
+  });
+
+  $("#download").click(function() {
+    // download from couchDB: TODO
+    downloadMessages(myRoomID);
   });
 
   $("#people").on('click', '.whisper', function() {
@@ -359,7 +513,8 @@ socket.on("history", function(data) {
       //peopleOnline.push(obj.name);
     });
 
-    /*var whisper = $("#whisper").prop('checked');
+    ///*
+    var whisper = $("#whisper").prop('checked');
     if (whisper) {
       $("#msg").typeahead({
           local: peopleOnline
@@ -367,10 +522,12 @@ socket.on("history", function(data) {
          if ($(this).hasClass('input-lg'))
               $(this).prev('.tt-hint').addClass('hint-lg');
       });
-    }*/
+    }
+    //*/
   });
 
   socket.on("chat", function(msTime, person, msg) {
+    // up to couchDB
     $("#msgs").append("<li><strong><span class='text-success'>" + timeFormat(msTime) + person.name + "</span></strong>: " + msg + "</li>");
     //clear typing field
      $("#"+person.name+"").remove();
