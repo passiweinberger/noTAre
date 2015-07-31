@@ -1,50 +1,128 @@
-var pg = require("pg")
+
 var http = require("http")
 
-if (process.env.VCAP_SERVICES) {
-  var env = JSON.parse(process.env.VCAP_SERVICES);
-  var credentials = env['postgresql-9.1'][0]['credentials'];
-} else {
-  var pg_password = process.env.PG_PASSWORD
-  var credentials = {"uri":"postgre://postgres:"+pg_password+"@localhost:5433/chat"}
-}
+var PgConnection = (function () {
+    var pg = require("pg")
+    pg.defaults.poolSize = 25;
 
-var port = (process.env.VCAP_APP_PORT || 5432);
-var host = (process.env.VCAP_APP_HOST || '127.0.0.1');
+    var port = (process.env.VCAP_APP_PORT || 5432);
+    var host = (process.env.VCAP_APP_HOST || '127.0.0.1');
 
-var tables = {
-	organization : 'id serial PRIMARY KEY, name character varying UNIQUE',
-	course		 : 'id serial PRIMARY KEY, org_id serial REFERENCES organization (id), name character varying, UNIQUE (org_id, name)',
-	tutor 		 : 'id serial PRIMARY KEY, org_id serial REFERENCES organization (id), course_id REFERENCES course (id), name character varying, UNIQUE (org_id, course_id, name)',
-	chat	     : 'id serial PRIMARY KEY, org_id serial REFERENCES organization (id), course_id REFERENCES course (id), tutor_id REFERENCES tutor (id), start_time timestamp with timezone, UNIQUE (org_id, course_id, tutor_id, name)'
-}
+    var tables = {
+        organization : 'id serial PRIMARY KEY, name character varying UNIQUE NOT NULL',
+        course       : 'id serial PRIMARY KEY, org_id int REFERENCES organization (id), name character varying NOT NULL, UNIQUE (org_id, name)',
+        tutor        : 'id serial PRIMARY KEY, org_id int REFERENCES organization (id), course_id int REFERENCES course (id), name character varying NOT NULL, UNIQUE (org_id, course_id, name)',
+        chat         : 'id serial PRIMARY KEY, org_id int REFERENCES organization (id), course_id int REFERENCES course (id), tutor_id int REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (org_id, course_id, tutor_id, start_time)'
+    }
+    if (process.env.VCAP_SERVICES) {
+      var env = JSON.parse(process.env.VCAP_SERVICES);
+      var credentials = env['postgresql-9.1'][0]['credentials'];
+      console.log("using ENV VCAP_SERVICES")
+    } else {
+      var pg_pass = process.env.PG_PASSWORD
+      console.log("using ENV PG_PASSWORD")
+      var credentials = {"uri":"postgre://postgres:"+pg_pass+"@localhost:5432/chat"}
+    }
+
+    var ctor = function() {
+        this.setup = function() {
+            for (table in tables) {
+                _doQuery('CREATE TABLE IF NOT EXISTS public.'+table+' ('+tables[table]+');');
+            }
+        }
+        this.tables = {
+            ORGANIZATION : 0,
+            COURSE       : 1,
+            TUTOR        : 2,
+            CHAT         : 3
+        }
+        this.Chat = {
+
+        }
+        this.find = function(table, obj) {
+            var qry;
+            switch (table) {
+                case 1: // course
+                    qry = "SELECT * FROM public.course WHERE NAME LIKE '%"+obj.course+"%';"; 
+                    break;
+                case 2: // tutor
+                    qry = "SELECT * FROM public.tutor WHERE NAME LIKE '%"+obj.tutor+"%';"; 
+                    break;
+                case 3:  // chat -- select stuff from *today*
+                    qry = "SELECT EXTRACT(EPOCH FROM start_time AT TIME ZONE 'UTC')::int AS start_time FROM chat where start_time > current_date;"; 
+                    break;
+                default: // org
+                    qry = "SELECT * FROM public.course WHERE NAME LIKE '%"+obj.organization+"%';"; 
+            }
+            _doQuery(qry, function(result) { return result; })
+        }
+        this.create = function(table, obj) {
+            var qry;
+            switch (table) {
+                case 1:
+                    qry = "INSERT INTO public.course (org_id, name) VALUES (\
+                        (SELECT id FROM public.organization WHERE NAME LIKE '%"+obj.org+"%'), \
+                        '"+obj.course+"');"
+                    break;
+                case 2:
+                    qry = "INSERT INTO public.tutor (org_id, course_id, name) VALUES (\
+                        (SELECT id FROM public.organization WHERE NAME LIKE '%"+obj.org+"%'), \
+                        (SELECT id FROM public.course WHERE NAME LIKE '%"+obj.course+"%'), \
+                        '"+obj.tutor+"');"
+                    break;
+                case 3:
+                    qry = "INSERT INTO public.chat (org_id, course_id, tutor_id, start_time) VALUES (\
+                        (SELECT id FROM public.organization WHERE NAME LIKE '%"+obj.org+"%'), \
+                        (SELECT id FROM public.course WHERE NAME LIKE '%"+obj.course+"%'), \
+                        (SELECT id FROM public.tutor WHERE NAME LIKE '%"+obj.tutor+"%'), \
+                        to_timestamp("+obj.start_time+"/1000.));"
+                    break;
+                default:
+                    qry = "INSERT INTO public.organization (name) VALUES ('"+obj.org+"');"
+            }
+            _doQuery(qry, function(result) { return result; })
+        }
+    }
+
+    var _doQuery = function _doQuery(qry, callback) {
+        pg.connect(credentials.uri, function(err, client, done) {
+            console.log(qry);
+            var query = client.query(qry, function(err, result) {
+                if (err) { console.log("Error running query: " + err); }
+                console.log(result);
+                if (callback != null)
+                    callback(result);
+                done();
+            });
+        });
+    }
+    return ctor;
+})();
+
+
+
+var conn;
 
 var server = http.createServer(function(req, res) {
-  var client = new pg.Client(credentials.uri);
-  for (table in tables) {
+    var Chat = module.require("./Chat.js")
+    var chatRoom = new Chat("Uni Mainz", "Hackathon", "Peter", ""+new Date().getTime());
+    console.log(chatRoom);
+    conn.create(conn.tables.ORGANIZATION, chatRoom);
+    conn.create(conn.tables.COURSE, chatRoom);
+    conn.create(conn.tables.TUTOR, chatRoom);
+    conn.create(conn.tables.CHAT, chatRoom);
 
-  console.log("connecting to "+credentials.uri+", adding " + table)
-
-	  client.connect(function(err) {
-	    if (err) {
-	      res.end("Could not connect to postgre: " + err);
-	    }
-	    client.query(
-	    	'CREATE TABLE IF NOT EXISTS '+table+' ('+tables[table]+')', 
-	    	function(err, result) {
-	      if (err) {
-	        res.end("Error running query: " + err);
-	      }
-	      res.end("PG Time: " + result.rows[0].pgTime);
-	      client.end();
-	    });
-	  });
-  }
-}).listen(port, host);
+    
+    res.end(conn.find(conn.tables.ORGANIZATION, "a"));
+    res.end(conn.find(conn.tables.CHAT, ""+new Date().getTime()));
+});
 
 
 server.on('listening',function(){
     console.log('ok, server is running');
+    conn = new PgConnection();
+    conn.setup();
+    console.log("done generating tables");
 });
 
 server.listen(8080);
