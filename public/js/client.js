@@ -6,7 +6,7 @@
 //WebSpeech API
 var final_transcript = '';
 var recognizing = false;
-var last1000000messages = []; // to be populated later
+// var lastmessages = []; // to be populated later
 
 if (!('webkitSpeechRecognition' in window)) {
   console.log("webkitSpeechRecognition is not available");

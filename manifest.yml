@@ -5,5 +5,3 @@ applications:
   path: .
   host: notare
   domain: mybluemix.net
-  services:
-  - redis-chatter
