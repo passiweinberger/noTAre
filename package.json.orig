@@ -1,0 +1,38 @@
+{
+  "name": "noTAre",
+  "version": "0.0.1",
+  "description": "Your collaborative and smart notepad for lectures and more!",
+  "main": "server.js",
+  "dependencies": {
+    "ejs": "^0.8.5",
+    "express": "^3.4.8",
+    "node-uuid": "^1.4.1",
+    "nodemon": "^1.0.13",
+    "npid": "^0.4.0",
+    "socket.io": "^0.9.16",
+    "shrinkwrap": "^0.0.3",
+<<<<<<< HEAD
+    "underscore": "^1.5.2",
+    "bootstrap": "^3.3.5",
+    "jquery": "^2.1.4",
+    "typeahead.js": "^0.11.1",
+    "font-awesome": "^4.4.0", 
+    "pg": "^4.4.0"
+=======
+    "underscore": "^1.5.2"
+>>>>>>> de209d2c8c0345adbe016076e10d58d14d8681ac
+  },
+  "engine": "^0.12.7",
+  "devDependencies": {},
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/passiweinberger/noTAre.git"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/passiweinberger/noTAre/issues"
+  },
+  "homepage": "https://github.com/passiweinberger/noTAre"
+}

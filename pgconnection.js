@@ -9,10 +9,10 @@ var PgConnection = (function () {
     var host = (process.env.VCAP_APP_HOST || '127.0.0.1');
 
     var tables = {
-        organization : 'id serial PRIMARY KEY, name character varying UNIQUE NOT NULL',
-        course       : 'id serial PRIMARY KEY, org_id int REFERENCES organization (id), name character varying NOT NULL, UNIQUE (org_id, name)',
-        tutor        : 'id serial PRIMARY KEY, org_id int REFERENCES organization (id), course_id int REFERENCES course (id), name character varying NOT NULL, UNIQUE (org_id, course_id, name)',
-        chat         : 'id serial PRIMARY KEY, org_id int REFERENCES organization (id), course_id int REFERENCES course (id), tutor_id int REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (org_id, course_id, tutor_id, start_time)'
+        organization : 'id serial NOT NULL PRIMARY KEY, name character varying UNIQUE NOT NULL',
+        course       : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), name character varying NOT NULL, UNIQUE (org_id, name)',
+        tutor        : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), name character varying NOT NULL, UNIQUE (org_id, course_id, name)',
+        chat         : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), tutor_id int NOT NULL REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (org_id, course_id, tutor_id, start_time)'
     }
     if (process.env.VCAP_SERVICES) {
       var env = JSON.parse(process.env.VCAP_SERVICES);
@@ -52,7 +52,7 @@ var PgConnection = (function () {
                     qry = "SELECT EXTRACT(EPOCH FROM start_time AT TIME ZONE 'UTC')::int AS start_time FROM chat where start_time > current_date;"; 
                     break;
                 default: // org
-                    qry = "SELECT * FROM public.course WHERE NAME LIKE '%"+obj.organization+"%';"; 
+                    qry = "SELECT * FROM public.organization WHERE NAME LIKE '%"+obj.org+"%';"; 
             }
             _doQuery(qry, function(result) { return result; })
         }
@@ -89,6 +89,7 @@ var PgConnection = (function () {
             console.log(qry);
             var query = client.query(qry, function(err, result) {
                 if (err) { console.log("Error running query: " + err); }
+                console.log(">" + qry + "\n>>");
                 console.log(result);
                 if (callback != null)
                     callback(result);
@@ -105,16 +106,18 @@ var conn;
 
 var server = http.createServer(function(req, res) {
     var Chat = module.require("./Chat.js")
-    var chatRoom = new Chat("Uni Mainz", "Hackathon", "Peter", ""+new Date().getTime());
+    var chatRoom = new Chat("Mainz", "Hac", "P", ""+new Date().getTime());
     console.log(chatRoom);
-    conn.create(conn.tables.ORGANIZATION, chatRoom);
-    conn.create(conn.tables.COURSE, chatRoom);
-    conn.create(conn.tables.TUTOR, chatRoom);
-    conn.create(conn.tables.CHAT, chatRoom);
+    // conn.create(conn.tables.ORGANIZATION, chatRoom);
+    // conn.create(conn.tables.COURSE, chatRoom);
+    // conn.create(conn.tables.TUTOR, chatRoom);
+    // conn.create(conn.tables.CHAT, chatRoom);
 
-    
-    res.end(conn.find(conn.tables.ORGANIZATION, "a"));
-    res.end(conn.find(conn.tables.CHAT, ""+new Date().getTime()));
+
+    res.end(conn.find(conn.tables.ORGANIZATION, chatRoom));
+    res.end(conn.find(conn.tables.COURSE, chatRoom));
+    res.end(conn.find(conn.tables.TUTOR, chatRoom));
+    res.end(conn.find(conn.tables.CHAT, chatRoom));
 });
 
 
