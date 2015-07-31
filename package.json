@@ -13,6 +13,7 @@
     "shrinkwrap": "^0.0.3",
     "underscore": "^1.5.2"
   },
+  "engine": "^0.12.7",
   "devDependencies": {},
   "scripts": {
   },
