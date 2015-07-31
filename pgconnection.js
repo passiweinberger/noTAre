@@ -19,7 +19,7 @@ var PgConnection = (function () {
       var credentials = env['postgresql-9.1'][0]['credentials'];
       console.log("using ENV VCAP_SERVICES")
     } else {
-      var pg_pass = process.env.PG_PASSWORD
+      var pg_pass = process.env.PG_PASSWORD // SET ENV VARIABLE: PG_PASWORD
       console.log("using ENV PG_PASSWORD")
       var credentials = {"uri":"postgre://postgres:"+pg_pass+"@localhost:5432/chat"}
     }

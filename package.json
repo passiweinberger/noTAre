@@ -12,15 +12,12 @@
     "socket.io": "^1.0.5",
     "shrinkwrap": "^0.0.3",
     "underscore": "^1.5.2",
-<<<<<<< HEAD
     "bootstrap": "^3.3.5",
     "jquery": "^2.1.4",
     "typeahead.js": "^0.11.1",
     "font-awesome": "^4.4.0", 
-    "pg": "^4.4.0"
-=======
+    "pg": "^4.4.0",
     "cfenv": "1.0.x"
->>>>>>> upstream/master
   },
   "engines": {"node": "^0.12.7"},
   "devDependencies": {},
