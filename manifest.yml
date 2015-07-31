@@ -5,3 +5,4 @@ applications:
   path: .
   host: notare
   domain: mybluemix.net
+  command: npm start
