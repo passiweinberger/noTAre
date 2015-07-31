@@ -81,7 +81,7 @@ function timeFormat(msTime) {
 
 $(document).ready(function() {
   // setup "global" variables first
-  var socket = io.connect("127.0.0.1:3000"); // or getg the process.env.IP etc.
+  var socket = io.connect("127.0.0.1:3000"); //"{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); or 127.0.0.1:3000
   var myRoomID = null;
 
   $("form").submit(function(event) {
