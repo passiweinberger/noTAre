@@ -22,13 +22,13 @@ function makeCouchDB(lectureID) {
   db = new PouchDB(lectureID);
   remoteCouch = cloudant_url + lectureID + '';
   db.info(function(err, info) {
-      /*
+      ///*
       db.changes({
           since: info.update_seq,
           continuous: true,
           onChange: readMessages
       });
-      */
+      //*/
   });
   if (remoteCouch) {
     sync();
@@ -102,7 +102,7 @@ function downloadMessages(roomName) {
 
 function readMessages() {
   db.allDocs({include_docs: true, descending: true}, function(err, doc) {
-    redrawUI(doc.rows);
+    redrawChat(doc.rows);
   });
 }
 
@@ -110,19 +110,8 @@ function readMessages() {
 function redrawChat(messages) {
     var ul = document.getElementById('msgs');
     ul.innerHTML = '';
-    messages.forEach(function(message) {
-        var li=document.createElement("li");
-        var pName = document.createElement("p");
-        var pMessage = document.createElement("p");
-
-        pName.textContent = message.doc.name;
-        pMessage.textContent = message.doc.content;
-        pName.className = "text-danger";
-
-        li.appendChild(pName);
-        li.appendChild(pMessage);
-        li.className = "list-group-item";
-        ul.appendChild(li);
+    messages.forEach(function(msg) {
+        $("#msgs").append("<li><span class='text-warning'>" + msg + "</span></li>");
     });
 }
 
