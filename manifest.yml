@@ -1,0 +1,9 @@
+---
+applications:
+- name: notare
+  memory: 128M
+  path: .
+  host: notare
+  domain: mybluemix.net
+  services:
+  - redis-chatter
