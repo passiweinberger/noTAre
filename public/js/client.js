@@ -72,10 +72,16 @@ function sync() {
 	syncDom.setAttribute('data-sync-state', 'syncing');
 	var opts = {
 		continuous: true,
-		complete: syncError
+		complete: completeHandlerCBD,
+		error: syncError
 	};
 	db.replicate.to(remoteCouch, opts);
 	db.replicate.from(remoteCouch, opts);
+}
+
+function completeHandlerCBD() {
+	console.log('sync succesful!');
+	syncDom.setAttribute('data-sync-state', 'success');
 }
 
 function exportToCsv(filename, rows) {
@@ -243,14 +249,14 @@ function startButton(event) {
 		if (recognizing) {
 			recognition.stop();
 			recognizing = false;
-			$("#start_button").prop("value", "Record");
+			$("#start_button").prop("value", "Aufnehmen");
 			return;
 		}
 		final_transcript = '';
 		// TODO change according to country
 		recognition.lang = "en-GB"
 		recognition.start();
-		$("#start_button").prop("value", "Recording ... Click to stop.");
+		$("#start_button").prop("value", "Nimmt auf... Drücke um es zu stoppen!");
 		// $("#msg").val(final_transcript);
 		$("#msg").val(final_transcript);
 	}
@@ -405,7 +411,7 @@ $(document).ready(function () {
 		} else {
 			$("#errors").empty();
 			$("#errors").show();
-			$("#errors").append("You have to be in a session to chat!");
+			$("#errors").append("Du musst in einer Vorlesung sein um zu chatten!");
 			$("#createRoom").show();
 		}
 	});
@@ -434,7 +440,7 @@ $(document).ready(function () {
 	socket.on("isTyping", function (data) {
 		if (data.isTyping) {
 			if ($("#" + data.person + "").length === 0) {
-				$("#updates").append("<li id='" + data.person + "'><span class='text-muted'><small><i class='fa fa-keyboard-o'></i> " + data.person + " is typing.</small></li>");
+				$("#updates").append("<li id='" + data.person + "'><span class='text-muted'><small><i class='fa fa-keyboard-o'></i> " + data.person + " ist am schreiben...</small></li>");
 				timeout = setTimeout(timeoutFunction, 5000);
 			}
 		} else {
@@ -448,30 +454,29 @@ $(document).ready(function () {
 
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
-		var roomName = "abcdef"; //$("#createRoomName").val();
+		var roomName = "abfddf_test1"; //$("#createRoomName").val(); 
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
 			if (roomExists) {
 				$("#errors").empty();
 				$("#errors").show();
-				$("#errors").append("Session <i>" + roomName + "</i> already currently runs, please join it!");
+				$("#errors").append("Die Vorlesung <i>" + roomName + "</i> läuft bereits! Husch, Husch, Hinein!");
 			} else {
 				if (roomName.length > 0) { //also check for roomname
 					joining = false;
-          makeCouchDB(roomName);
+          			makeCouchDB(roomName);
 					socket.emit("createRoom", roomName);
 					$("#errors").empty();
 					$("#errors").hide();
-          
-          $("body").children().hide();
-          $("#chatPage").show();
+          			$("body").children().hide();
+          			$("#chatPage").show();
 				}
 			}
 		});
 	});
   /*
 	$("#createRoomButton").on('click', function () {
-		var roomName = "abcdef"; //TODO:Random
+		var roomName = "abfddf_test1"; //$("#createRoomName").val(); 
 
 		$("body").children().hide();
 		$("#sync-wrapper").show();
@@ -659,7 +664,7 @@ $(document).ready(function () {
 	socket.on("exists", function (data) {
 		$("#errors").empty();
 		$("#errors").show();
-		$("#errors").append(data.msg + " Try <strong>" + data.proposedName + "</strong>");
+		$("#errors").append(data.msg + " Versuche es mal mit <strong>" + data.proposedName + "</strong>");
 		toggleNameForm();
 		toggleChatWindow();
 	});
@@ -698,12 +703,12 @@ $(document).ready(function () {
 
 	socket.on("history", function (data) {
 		if (data.length !== 0) {
-			$("#msgs").append("<li><strong><span class='text-warning'>Last messages:</li>");
+			$("#msgs").append("<li><strong><span class='text-warning'>Letzte Nachrichten: </li>");
 			$.each(data, function (data, msg) {
 				$("#msgs").append("<li><span class='text-warning'>" + msg.time + ': ' + msg.message + "</span></li>");
 			});
 		} else {
-			$("#msgs").append("<li><strong><span class='text-warning'>No past messages in this room.</li>");
+			$("#msgs").append("<li><strong><span class='text-warning'>Noch keine Nachrichten in dieser Vorlesung!</li>");
 		}
 	});
 
@@ -714,7 +719,7 @@ $(document).ready(function () {
 	socket.on("update-people", function (data) {
 		//var peopleOnline = [];
 		$("#people").empty();
-		$('#people').append("<li class=\"list-group-item active\">People online <span class=\"badge\">" + data.count + "</span></li>");
+		$('#people').append("<li class=\"list-group-item active\">Kommolitonen online: <span class=\"badge\">" + data.count + "</span></li>");
 		$.each(data.people, function (a, obj) {
 			if (!("country" in obj)) {
 				html = "";
@@ -758,14 +763,14 @@ $(document).ready(function () {
 
 	socket.on("roomList", function (data) {
 		$("#rooms").text("");
-		$("#rooms").append("<li class=\"list-group-item active\">List of rooms <span class=\"badge\">" + data.count + "</span></li>");
+		$("#rooms").append("<li class=\"list-group-item active\">Liste von Vorlesungen: <span class=\"badge\">" + data.count + "</span></li>");
 		if (!jQuery.isEmptyObject(data.rooms)) {
 			$.each(data.rooms, function (id, room) {
 				var html = "<button id=" + id + " class='joinRoomBtn btn btn-default btn-xs' >Join</button>" + " " + "<button id=" + id + " class='removeRoomBtn btn btn-default btn-xs'>Remove</button>";
 				$('#rooms').append("<li id=" + id + " class=\"list-group-item\"><span>" + room.name + "</span> " + html + "</li>");
 			});
 		} else {
-			$("#rooms").append("<li class=\"list-group-item\">There are no rooms yet.</li>");
+			$("#rooms").append("<li class=\"list-group-item\">Es gibt noch keine Vorlesungen!</li>");
 		}
 	});
 
@@ -777,7 +782,7 @@ $(document).ready(function () {
 	});
 
 	socket.on("disconnect", function () {
-		$("#msgs").append("<li><strong><span class='text-warning'>The server is not available</span></strong></li>");
+		$("#msgs").append("<li><strong><span class='text-warning'>Verbindung zum Server unterbrochen... </span></strong></li>");
 		$("#msg").attr("disabled", "disabled");
 		$("#send").attr("disabled", "disabled");
 	});
@@ -822,7 +827,7 @@ $(document).ready(function () {
 
 		//var str = $(this).val().toLowerCase();
 		//chatRoom.setOrg($(this).val());
-		console.log(chatRoom);
+		//console.log(chatRoom);
 
 		/*$("#dropDownContainer ul").html("");
 		elems.forEach(function (elem) {
