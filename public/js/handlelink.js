@@ -1,5 +1,5 @@
-var typer = require('./getType.js');
-var regexFile = require('./regex.js');
+//var typer = require('./getType.js');
+//var regexFile = require('./regex.js');
 
 
 String.prototype.splice = function( idx, rem, s ) {
@@ -46,8 +46,8 @@ function parseTextToLinks(text){
 }
 
 
-module.exports = {
-	handlelink: function(text){
+
+var handlelink = function(text){
 		var parsed = parseTextToLinks(text);
 		if (parsed.indexOf('<a href=\"') != -1){
 			var link = parsed.slice(parsed.indexOf('<a href=\"') + 9,parsed.indexOf('\"  target=\"_blank\"'));
@@ -77,5 +77,5 @@ module.exports = {
         		break;
 			}
 		}
-	}
 }
+

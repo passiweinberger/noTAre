@@ -40,13 +40,13 @@ if (roomID != undefined) {
 
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
-// var remoteCouch = cloudant_url + sessionID;
+// var remoteCouch = cloudant_url + roomName;
 
 var syncDom = document.getElementById('sync-wrapper');
 
-function makeCouchDB(lectureID) {
-	db = new PouchDB('' + lectureID);
-	remoteCouch = cloudant_url + lectureID;
+function makeCouchDB(roomName) {
+	db = new PouchDB('' + roomName);
+	remoteCouch = cloudant_url + roomName;
 	db.info(function (err, info) {
 		///*
 		db.changes({
@@ -55,6 +55,7 @@ function makeCouchDB(lectureID) {
 			live: true,
 			onChange: readMessages
 		});
+    //.on('change', readMessages);
 		//*/
 	});
 	if (remoteCouch) {
@@ -422,10 +423,9 @@ $(document).ready(function () {
 		$("#createRoomForm").toggle();
 	});
 
-	/*$("#createRoomBtn").click(function () {
+	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
-		var roomName = $("#createRoomName").val();
-		//if (check(roomName)) {
+		var roomName = "abcdef"; //$("#createRoomName").val();
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
 			if (roomExists) {
@@ -434,16 +434,19 @@ $(document).ready(function () {
 				$("#errors").append("Session <i>" + roomName + "</i> already currently runs, please join it!");
 			} else {
 				if (roomName.length > 0) { //also check for roomname
-					makeCouchDB(roomName);
+					joining = false;
+          makeCouchDB(roomName);
 					socket.emit("createRoom", roomName);
 					$("#errors").empty();
 					$("#errors").hide();
+          
+          $("body").children().hide();
+          $("#chatPage").show();
 				}
 			}
 		});
-		//}
-	});*/
-
+	});
+  /*
 	$("#createRoomButton").on('click', function () {
 		var roomName = "abcdef"; //TODO:Random
 
@@ -457,6 +460,7 @@ $(document).ready(function () {
 		$("#chatPage").show();
 
 	});
+  */
 
 
 	/*$("#rooms").on('click', '.joinRoomBtn', function () {
