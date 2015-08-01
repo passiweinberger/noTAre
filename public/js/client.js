@@ -10,7 +10,13 @@ var lastmessages = []; // to be populated later
 var db, remoteCouch;
 var roomName;
 var joining = true;
-var suggest_wiki = false;
+//var roomName = getUrlParameter("roomID");
+var MyName;
+//IMPORTANT: CONFIGURE remoteCouch with your own details
+var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
+var syncDom = document.getElementById('sync-wrapper');
+// turn to true if you want Wiki artikles suggested based on statistics TODO
+var suggest_wiki = false; 
 
 
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -27,15 +33,6 @@ var getUrlParameter = function getUrlParameter(sParam) {
 		}
 	}
 };
-
-//var roomName = getUrlParameter("roomID");
-var MyName;
-
-//IMPORTANT: CONFIGURE remoteCouch with your own details
-var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
-// var remoteCouch = cloudant_url + roomName;
-
-var syncDom = document.getElementById('sync-wrapper');
 
 function makeCouchDB(roomName) {
 	db = new PouchDB('' + roomName);
@@ -78,14 +75,6 @@ function completeHandlerCBD() {
 }
 
 function exportToCsv(filename, rows) {
-	/*
-	var message = {
-			_id: new Date().toISOString(), //required
-			name: $("#username"),
-			time: nowTime,
-			message: msg
-	};
-	*/
 	var processRow = function (row) {
 		var finalVal = '';
 		for (var j = 0; j < row.length; j++) {
@@ -134,16 +123,7 @@ function downloadMessages(roomName) {
 		descending: true
 	}, function (err, doc) {
 		if (!err) {
-			// write messages to file: TODO
 			var filename = '' + roomName + '.csv';
-			/*
-			var message = {
-				_id: new Date().toISOString(), //required
-				name: $("#username"),
-				time: nowTime,
-				message: msg
-			};
-			*/
 			exportToCsv(filename, doc.rows);
 		} else {
 			console.log(err);
@@ -184,7 +164,6 @@ function redrawChat(messages) {
 		li.appendChild(pMessage);
 		li.className = "list-group-item";
 		ul.appendChild(li);
-		// suggest a wiki artikle: TODO
 		if (suggest_wiki) {
 			suggest_Wiki(messages);
 		}
@@ -209,7 +188,6 @@ function translateMsgs(messages, language) {
 		li.appendChild(pMessage);
 		li.className = "list-group-item";
 		ul.appendChild(li);
-		// suggest a wiki artikle: TODO
 		if (suggest_wiki) {
 			suggest_Wiki(messages);
 		}
@@ -237,9 +215,11 @@ if (!('webkitSpeechRecognition' in window)) {
 				$('#msg').removeClass("interim");
 			} else {
 				interim_transcript += event.results[i][0].transcript;
-				/*uses $("#msg").val(interim_transcript);
+				/* For intermediate results
+				uses $("#msg").val(interim_transcript);
 				$('#msg').addClass("interim");
-				$('#msg').removeClass("final");*/
+				$('#msg').removeClass("final");
+				*/
 			}
 		}
 		$("#msg").val(final_transcript);
@@ -305,15 +285,13 @@ function ajaxGet(docUrl, func) {
 
 function errorHandler(jqXHR, textStatus, errorThrown) {
 	console.log(errorThrown);
-	//$.JSONView(jqXHR, $('#output-data'));
 }
 
 function completeHandler(jqXHR, textStatus, errorThrown) {
 	console.log(errorThrown)
-		//$.JSONView(jqXHR, $('#output-data'));
 }
 
-/*
+/* Returns true if the roomName doesn't exsist
 function check(roomName) {
   var doc;
   ajaxGet(cloudant_url + roomName + '', function(response) {
@@ -344,7 +322,7 @@ $(document).ready(function () {
 		$("#chatPage").show();
 		$("#main-chat-screen").show();
 		socket.emit("joinRoom", roomName);
-		//TODO: Ask for Username
+		//TODO: Ask for Username TODO
 		//$('#userModal').modal('show');
 		//$("#username").focus();
 	}
@@ -379,7 +357,7 @@ $(document).ready(function () {
 		}
 		if (MyName === "" || MyName.length < 2) {
 			$("#errors").empty();
-			$("#errors").append("Bitte gebe einen username ein!");
+			$("#errors").append("Bitte gebe einen Username ein!");
 			$("#errors").show();
 		} else {
 			socket.emit("joinserver", MyName, device);
