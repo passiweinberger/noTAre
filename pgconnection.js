@@ -1,4 +1,4 @@
-var http = require("http")
+var http = require("http");
 
 var PgConnection = (function () {
 	var pg = require("pg")
