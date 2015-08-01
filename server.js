@@ -1,9 +1,7 @@
 var express = require('express')
 , app = express()
-//, server = require('http').createServer(app)
-, http = require('http').Server(app) //
-//, io = require("socket.io").listen(server)
-, io = require('socket.io')(http) //
+, http = require('http').Server(app) // .createServer(app)
+, io = require('socket.io')(http) // .listen(http)
 , npid = require("npid")
 , uuid = require('node-uuid')
 , Room = require('./room.js')
@@ -141,9 +139,6 @@ io.sockets.on("connection", function (socket) {
 	});
 	
 	socket.on("send", function(msTime, msg) {
-		// log to redis: TODO
-		// redisWriter.append() ;
-
 		//process.exit(1);
 		var re = /^[w]:.*:/;
 		var whisper = re.test(msg.message);
