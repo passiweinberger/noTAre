@@ -103,14 +103,14 @@
 						</ul>
 					</div>
 					<input class="middleInput">
-					<button class="btn btn success createHierarchy">Create</button>
+					<button class="btn btn success createHierarchy">Erstellen</button>
 					<div id="dropDownContainer">
 						<ul class="list-group"></ul>
 					</div>
 
 					<form id="pickDateForm" method="post" class="form-horizontal">
 						<div class="form-group">
-							<label class="col-xs-3 control-label">Date of Lecture</label>
+							<label class="col-xs-3 control-label">Datum der Vorlesung</label>
 							<div class="col-xs-5">
 								<input type="text" class="form-control" name="dob" id="dob">
 							</div>
@@ -118,10 +118,10 @@
 						</div>
 					</form>
 
-					<button id="createRoomButton">(Create Room)</button>
+					<button id="createRoomButton" class="btn btn-large">Erstelle eine Vorlesung</button>
 					<div id="sync-wrapper">
-						<div id="sync-success" class="alert alert-success">Status: sync working. Be patient.</div>
-						<div id="sync-error" class="alert alert-danger">Status: sync failed. Try refreshing the page.</div>
+						<div id="sync-success" class="alert alert-success">Status: sync working. Habe etwas gedult...</div>
+						<div id="sync-error" class="alert alert-danger">Status: sync failed. Lade die Seite mal neu...</div>
 					</div>
 				</div>
 			</div>
@@ -176,9 +176,9 @@
 			<div class="container">
 				<div class="row">
 					<div class="col-lg-8 col-lg-offset-2 text-center">
-						<h2 class="section-heading">Let's Get In Touch!</h2>
+						<h2 class="section-heading">Kontaktiere uns!</h2>
 						<hr class="primary">
-						<p>Ready to start your next project with us? That's great! Give us a call or send us an email and we will get back to you as soon as possible!</p>
+						<p></p>
 					</div>
 					<div class="col-lg-4 col-lg-offset-2 text-center">
 						<i class="fa fa-phone fa-3x wow bounceIn"></i>
@@ -186,7 +186,9 @@
 					</div>
 					<div class="col-lg-4 text-center">
 						<i class="fa fa-envelope-o fa-3x wow bounceIn" data-wow-delay=".1s"></i>
-						<p><a href="mailto:your-email@your-domain.com">feedback@startbootstrap.com</a>
+						<p><a href="mailto:support@notare.de">support@notare.de</a>
+						</p>
+						<p><a href="https://github.com/passiweinberger/noTAre">Finde Uns auf Github und werde Teil von noTAre!</a>
 						</p>
 					</div>
 				</div>
@@ -201,7 +203,7 @@
 				<!-- Brand and toggle get grouped for better mobile display -->
 				<div class="navbar-header">
 					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
-						<span class="sr-only">Toggle navigation</span>
+						<span class="sr-only">Toggle Navigation</span>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
@@ -216,18 +218,18 @@
 				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav navbar-right">
 						<li>
-							<a class="page-scroll" href="#about"><i class="fa fa-download"></i></a>
+							<a class="page-scroll" id="download_button"><i class="fa fa-download"></i></a>
 							<li>
-								<a class="page-scroll" href="#about">DE</a>
+								<button type="button" class="page-scroll" id="translate_fr">FR</button>
 							</li>
 							<li>
-								<a class="page-scroll" href="#services">EN</a>
+								<button type="button" class="page-scroll" id="translate_es">ES</button>
 							</li>
 							<li>
-								<a class="page-scroll" href="#portfolio">ES</a>
+								<button type="button" class="page-scroll" id="translate_de">DE</button>
 							</li>
 							<li>
-								<a class="page-scroll" href="#contact">FR</a>
+								<button type="button" class="page-scroll" id="translate_en">EN</button>
 							</li>
 					</ul>
 				</div>
@@ -259,6 +261,7 @@
 				<ul class="list-unstyled" id="updates"></ul>
 			</div>
 		</div>
+		<!--<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#userModal">Open Modal</button>//-->
 	</div>
 
 	<!-- Modal start
@@ -282,9 +285,30 @@ You can create a chat room here. Names have to be unique.
 </div>
 <!-- Modal end -->
 
+	<!--<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="usernameLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title" id="createRoomLabel">Bentuzername</h4>
+				</div>
+				<div class="modal-body">
+					Bitte geben sie ihren Benutzernamen ein.
+					<form class="form-inline" id="usernameForm">
+						<input type="text" class="form-control input-lg" placeholder="Benutzername" id="username">
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Close</button>
+					<button data-dismiss="modal" id="usernameBtn" class="btn btn-success btn-lg">Submit</button>
+				</div>
+			</div>
+		</div>
+	</div>//-->
+
+
 	<script src="components/jquery/dist/jquery.js"></script>
 	<script src="components/bootstrap/dist/js/bootstrap.js"></script>
-	</div>
 
 	<!-- jQuery -->
 	<script src="js/jquery.js"></script>

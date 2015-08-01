@@ -2,8 +2,8 @@
 //var translator = require('./translator.js');
 
 
-var parse = function(message,translated,language){
-		if (translated == true){
+var parse = function(message,translate,language){
+		if (translate === true){
 			message = translator.translate(language,message);
 		}
 		

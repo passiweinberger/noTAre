@@ -28,15 +28,6 @@ var getUrlParameter = function getUrlParameter(sParam) {
 
 var roomID = getUrlParameter("roomID");
 
-// Test ob RoomID schon gesetzt ist?
-if (roomID != undefined) {
-	$("body").children().hide();
-	$("#chatPage").show();
-	socket.emit("joinRoom", roomID);
-	//TODO: Ask for Username
-}
-
-
 
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
@@ -55,7 +46,7 @@ function makeCouchDB(roomName) {
 			live: true,
 			onChange: readMessages
 		});
-    //.on('change', readMessages);
+		//.on('change', readMessages);
 		//*/
 	});
 	if (remoteCouch) {
@@ -72,18 +63,25 @@ function sync() {
 	syncDom.setAttribute('data-sync-state', 'syncing');
 	var opts = {
 		continuous: true,
-		complete: syncError
+		complete: completeHandlerCBD,
+		error: syncError
 	};
 	db.replicate.to(remoteCouch, opts);
 	db.replicate.from(remoteCouch, opts);
 }
 
+function completeHandlerCBD() {
+	console.log('sync succesful!');
+	syncDom.setAttribute('data-sync-state', 'success');
+}
+
 function exportToCsv(filename, rows) {
 	/*
 	var message = {
-	    _id: new Date().toISOString(), //required
-	    name: newChatName.value,
-	    message: newChatMessage.value
+			_id: new Date().toISOString(), //required
+			name: $("#name"),
+			time: nowTime,
+			message: msg
 	};
 	*/
 	var processRow = function (row) {
@@ -137,11 +135,12 @@ function downloadMessages(roomName) {
 			// write messages to file: TODO
 			var filename = '' + roomName + '.csv';
 			/*
-			  var message = {
-			      _id: new Date().toISOString(), //required
-			      name: newChatName.value,
-			      message: newChatMessage.value
-			  };
+			var message = {
+				_id: new Date().toISOString(), //required
+				name: $("#name"),
+				time: nowTime,
+				message: msg
+			};
 			*/
 			exportToCsv(filename, doc.rows);
 		} else {
@@ -163,7 +162,7 @@ function readMessages() {
 function redrawChat2(messages) {
 	$("#msgs").val('');
 	messages.forEach(function (msg) {
-		$("#msgs").append("<li><span class='text-warning'>" + msg.doc.message + "</span></li>");
+		$("#msgs").append("<li><span class='text-warning'>" + msg.doc.message + '\n' + handlelink(msg.doc.message) + "</span></li>"); // msg.doc.message
 	});
 }
 
@@ -176,7 +175,7 @@ function redrawChat(messages) {
 		var pMessage = document.createElement("p");
 
 		pName.textContent = message.doc.name;
-		pMessage.textContent = message.doc.content;
+		pMessage.textContent = msg.doc.message + '\n' + handlelink(msg.doc.message); //message.doc.message;
 		pName.className = "text-danger";
 
 		li.appendChild(pName);
@@ -184,7 +183,29 @@ function redrawChat(messages) {
 		li.className = "list-group-item";
 		ul.appendChild(li);
 	});
-};
+}
+
+function translateMsgs(messages, language) {
+	// TODO
+	var translated_msg;
+	var ul = document.getElementById('msgs');
+	ul.innerHTML = '';
+	messages.forEach(function (message) {
+		var li = document.createElement("li");
+		var pName = document.createElement("p");
+		var pMessage = document.createElement("p");
+
+		pName.textContent = message.doc.name;
+		translated_msg = translate(language, message.doc.message);
+		pMessage.textContent = translated_msg + '\n' + handlelink(translated_msg); //translated_msg
+		pName.className = "text-danger";
+
+		li.appendChild(pName);
+		li.appendChild(pMessage);
+		li.className = "list-group-item";
+		ul.appendChild(li);
+	});
+}
 
 
 if (!('webkitSpeechRecognition' in window)) {
@@ -220,14 +241,14 @@ function startButton(event) {
 		if (recognizing) {
 			recognition.stop();
 			recognizing = false;
-			$("#start_button").prop("value", "Record");
+			$("#start_button").prop("value", "Aufnehmen");
 			return;
 		}
 		final_transcript = '';
 		// TODO change according to country
 		recognition.lang = "en-GB"
 		recognition.start();
-		$("#start_button").prop("value", "Recording ... Click to stop.");
+		$("#start_button").prop("value", "Nimmt auf... Drücke um es zu stoppen!");
 		// $("#msg").val(final_transcript);
 		$("#msg").val(final_transcript);
 	}
@@ -308,6 +329,18 @@ $(document).ready(function () {
 	var socket = io(); // io.connect("{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); // process.env.CF_INSTANCE_ADDR // "75.126.81.66:3000" or for local runs: 127.0.0.1:3000
 	var myRoomID = null;
 
+	// Test ob RoomID schon gesetzt ist?
+	if (roomID != undefined) {
+		$("body").children().hide();
+		$("#chatPage").show();
+		$("#main-chat-screen").show();
+		//$('#userModal').modal('show');
+		socket.emit("joinRoom", roomID);
+		//TODO: Ask for Username
+	}
+
+
+
 	$("form").submit(function (event) {
 		event.preventDefault();
 	});
@@ -359,32 +392,27 @@ $(document).ready(function () {
 
 	//main chat screen
 	$("#chatForm").submit(function () {
-		if (myRoomID !== null) {
-			var msg = $("#msg").val();
-			if (msg !== "") {
-				var nowTime = new Date().getTime();
-				var message = {
-					_id: new Date().toISOString(), //required
-					name: $("#name"),
-					time: nowTime,
-					message: msg
-				};
-				socket.emit("send", nowTime, message);
-				db.put(message, function callback(err, result) {
-					if (!err) {
-						console.log('Successfully uploaded to couchDB!');
-					} else {
-						console.log(err);
-					}
-				});
-				$("#msg").val("");
-			}
-		} else {
-			$("#errors").empty();
-			$("#errors").show();
-			$("#errors").append("You have to be in a session to chat!");
-			$("#createRoom").show();
+
+		var msg = $("#msg").val();
+		if (msg !== "") {
+			var nowTime = new Date().getTime();
+			var message = {
+				_id: new Date().toISOString(), //required
+				name: 'user',
+				time: nowTime,
+				message: msg
+			};
+			socket.emit("send", nowTime, message);
+			db.put(message, function callback(err, result) {
+				if (!err) {
+					console.log('Successfully uploaded to couchDB!');
+				} else {
+					console.log(err);
+				}
+			});
+			$("#msg").val("");
 		}
+
 	});
 
 	//'is typing' message
@@ -411,7 +439,7 @@ $(document).ready(function () {
 	socket.on("isTyping", function (data) {
 		if (data.isTyping) {
 			if ($("#" + data.person + "").length === 0) {
-				$("#updates").append("<li id='" + data.person + "'><span class='text-muted'><small><i class='fa fa-keyboard-o'></i> " + data.person + " is typing.</small></li>");
+				$("#updates").append("<li id='" + data.person + "'><span class='text-muted'><small><i class='fa fa-keyboard-o'></i> " + data.person + " ist am schreiben...</small></li>");
 				timeout = setTimeout(timeoutFunction, 5000);
 			}
 		} else {
@@ -425,30 +453,34 @@ $(document).ready(function () {
 
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
-		var roomName = "abcdef"; //$("#createRoomName").val();
+		var roomName = "abfddf_test1"; //$("#createRoomName").val(); 
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
 			if (roomExists) {
 				$("#errors").empty();
 				$("#errors").show();
-				$("#errors").append("Session <i>" + roomName + "</i> already currently runs, please join it!");
+				$("#errors").append("Die Vorlesung <i>" + roomName + "</i> läuft bereits! Husch, Husch, Hinein!");
 			} else {
 				if (roomName.length > 0) { //also check for roomname
 					joining = false;
-          makeCouchDB(roomName);
+
+					makeCouchDB(roomName);
 					socket.emit("createRoom", roomName);
 					$("#errors").empty();
 					$("#errors").hide();
-          
-          $("body").children().hide();
-          $("#chatPage").show();
+
+					$("body").children().hide();
+					$("#chatPage").show();
+					$("#main-chat-screen").show();
+					//$('#userModal').modal('show');
+
 				}
 			}
 		});
 	});
-  /*
+	/*
 	$("#createRoomButton").on('click', function () {
-		var roomName = "abcdef"; //TODO:Random
+		var roomName = "abfddf_test1"; //$("#createRoomName").val(); 
 
 		$("body").children().hide();
 		$("#sync-wrapper").show();
@@ -484,8 +516,97 @@ $(document).ready(function () {
 
 	$("#download").click(function () {
 		// download from couchDB: TODO
+		// socket.emit('download', myRoomID);
 		downloadMessages(myRoomID);
 	});
+
+	//  TRANSLATIONS: TODO
+
+	$("#translate_en").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				translateMsgs(messages, 'en');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	$("#translate_es").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				translateMsgs(messages, 'es');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	$("#translate_fr").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				translateMsgs(messages, 'fr');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	$("#translate_de").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				translateMsgs(messages, 'de');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	// TRANSLATE END
 
 	$("#people").on('click', '.whisper', function () {
 		var name = $(this).siblings("span").text();
@@ -545,7 +666,7 @@ $(document).ready(function () {
 	socket.on("exists", function (data) {
 		$("#errors").empty();
 		$("#errors").show();
-		$("#errors").append(data.msg + " Try <strong>" + data.proposedName + "</strong>");
+		$("#errors").append(data.msg + " Versuche es mal mit <strong>" + data.proposedName + "</strong>");
 		toggleNameForm();
 		toggleChatWindow();
 	});
@@ -584,12 +705,12 @@ $(document).ready(function () {
 
 	socket.on("history", function (data) {
 		if (data.length !== 0) {
-			$("#msgs").append("<li><strong><span class='text-warning'>Last messages:</li>");
+			$("#msgs").append("<li><strong><span class='text-warning'>Letzte Nachrichten: </li>");
 			$.each(data, function (data, msg) {
 				$("#msgs").append("<li><span class='text-warning'>" + msg.time + ': ' + msg.message + "</span></li>");
 			});
 		} else {
-			$("#msgs").append("<li><strong><span class='text-warning'>No past messages in this room.</li>");
+			$("#msgs").append("<li><strong><span class='text-warning'>Noch keine Nachrichten in dieser Vorlesung!</li>");
 		}
 	});
 
@@ -600,7 +721,7 @@ $(document).ready(function () {
 	socket.on("update-people", function (data) {
 		//var peopleOnline = [];
 		$("#people").empty();
-		$('#people').append("<li class=\"list-group-item active\">People online <span class=\"badge\">" + data.count + "</span></li>");
+		$('#people').append("<li class=\"list-group-item active\">Kommolitonen online: <span class=\"badge\">" + data.count + "</span></li>");
 		$.each(data.people, function (a, obj) {
 			if (!("country" in obj)) {
 				html = "";
@@ -644,14 +765,14 @@ $(document).ready(function () {
 
 	socket.on("roomList", function (data) {
 		$("#rooms").text("");
-		$("#rooms").append("<li class=\"list-group-item active\">List of rooms <span class=\"badge\">" + data.count + "</span></li>");
+		$("#rooms").append("<li class=\"list-group-item active\">Liste von Vorlesungen: <span class=\"badge\">" + data.count + "</span></li>");
 		if (!jQuery.isEmptyObject(data.rooms)) {
 			$.each(data.rooms, function (id, room) {
 				var html = "<button id=" + id + " class='joinRoomBtn btn btn-default btn-xs' >Join</button>" + " " + "<button id=" + id + " class='removeRoomBtn btn btn-default btn-xs'>Remove</button>";
 				$('#rooms').append("<li id=" + id + " class=\"list-group-item\"><span>" + room.name + "</span> " + html + "</li>");
 			});
 		} else {
-			$("#rooms").append("<li class=\"list-group-item\">There are no rooms yet.</li>");
+			$("#rooms").append("<li class=\"list-group-item\">Es gibt noch keine Vorlesungen!</li>");
 		}
 	});
 
@@ -663,7 +784,7 @@ $(document).ready(function () {
 	});
 
 	socket.on("disconnect", function () {
-		$("#msgs").append("<li><strong><span class='text-warning'>The server is not available</span></strong></li>");
+		$("#msgs").append("<li><strong><span class='text-warning'>Verbindung zum Server unterbrochen... </span></strong></li>");
 		$("#msg").attr("disabled", "disabled");
 		$("#send").attr("disabled", "disabled");
 	});
@@ -706,16 +827,17 @@ $(document).ready(function () {
 
 	$(".middleInput").on('keyup', function (e) {
 
-		//var str = $(this).val().toLowerCase();
+		var str = $(this).val().toLowerCase();
 		//chatRoom.setOrg($(this).val());
-		console.log(chatRoom);
+		console.log(str);
 
-		/*$("#dropDownContainer ul").html("");
+
+		$("#dropDownContainer ul").html("");
 		elems.forEach(function (elem) {
 			if (elem.name.toLowerCase().contains(str)) {
 				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
 			}
-		});*/
+		});
 	});
 
 	// PICKADATE
