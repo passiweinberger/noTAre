@@ -81,9 +81,10 @@ function sync() {
 function exportToCsv(filename, rows) {
 	/*
 	var message = {
-	    _id: new Date().toISOString(), //required
-	    name: newChatName.value,
-	    message: newChatMessage.value
+			_id: new Date().toISOString(), //required
+			name: $("#name"),
+			time: nowTime,
+			message: msg
 	};
 	*/
 	var processRow = function (row) {
@@ -137,11 +138,12 @@ function downloadMessages(roomName) {
 			// write messages to file: TODO
 			var filename = '' + roomName + '.csv';
 			/*
-			  var message = {
-			      _id: new Date().toISOString(), //required
-			      name: newChatName.value,
-			      message: newChatMessage.value
-			  };
+			var message = {
+				_id: new Date().toISOString(), //required
+				name: $("#name"),
+				time: nowTime,
+				message: msg
+			};
 			*/
 			exportToCsv(filename, doc.rows);
 		} else {
@@ -176,7 +178,7 @@ function redrawChat(messages) {
 		var pMessage = document.createElement("p");
 
 		pName.textContent = message.doc.name;
-		pMessage.textContent = message.doc.content;
+		pMessage.textContent = message.doc.message;
 		pName.className = "text-danger";
 
 		li.appendChild(pName);
@@ -184,7 +186,28 @@ function redrawChat(messages) {
 		li.className = "list-group-item";
 		ul.appendChild(li);
 	});
-};
+}
+
+function translateMsgs(messages, language) {
+	// TODO
+	var translated_msg;
+	var ul = document.getElementById('msgs');
+	ul.innerHTML = '';
+	messages.forEach(function (message) {
+		var li = document.createElement("li");
+		var pName = document.createElement("p");
+		var pMessage = document.createElement("p");
+
+		pName.textContent = message.doc.name;
+		pMessage.textContent = translated_msg = translate(language, message.doc.message);
+		pName.className = "text-danger";
+
+		li.appendChild(pName);
+		li.appendChild(pMessage);
+		li.className = "list-group-item";
+		ul.appendChild(li);
+	});
+}
 
 
 if (!('webkitSpeechRecognition' in window)) {
@@ -486,6 +509,75 @@ $(document).ready(function () {
 		// download from couchDB: TODO
 		downloadMessages(myRoomID);
 	});
+
+	//  TRANSLATIONS: TODO
+	$("#translate_en").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				//exportToCsv(filename, doc.rows);
+				translateMsgs(messages, 'en');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	$("#translate_fr").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				//exportToCsv(filename, doc.rows);
+				translateMsgs(messages, 'fr');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	$("#translate_de").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				//exportToCsv(filename, doc.rows);
+				translateMsgs(messages, 'de');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	// TRANSLATE END
 
 	$("#people").on('click', '.whisper', function () {
 		var name = $(this).siblings("span").text();
