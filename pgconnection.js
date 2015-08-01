@@ -2,6 +2,9 @@
 var http = require("http")
 
 var PgConnection = (function () {
+
+// --------------- setup/preparation ----------------
+
     var pg = require("pg")
     pg.defaults.poolSize = 25;
 
@@ -12,7 +15,8 @@ var PgConnection = (function () {
         organization : 'id serial NOT NULL PRIMARY KEY, name character varying UNIQUE NOT NULL',
         course       : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), name character varying NOT NULL, UNIQUE (org_id, name)',
         tutor        : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), name character varying NOT NULL, UNIQUE (org_id, course_id, name)',
-        chat         : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), tutor_id int NOT NULL REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (org_id, course_id, tutor_id, start_time)'
+        chat         : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), tutor_id int NOT NULL REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (org_id, course_id, tutor_id, start_time)',
+        logs         : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), tutor_id int NOT NULL REFERENCES tutor (id), chat_start_time timestamp with time zone NOT NULL REFERENCES chat (start_time), language CHARACTER(3) NOT NULL, data BYTEA NOT NULL, UNIQUE (org_id, course_id, tutor_id, chat_start_time, language, data)'
     }
     if (process.env.VCAP_SERVICES) {
       var env = JSON.parse(process.env.VCAP_SERVICES);
@@ -24,21 +28,26 @@ var PgConnection = (function () {
       var credentials = {"uri":"postgre://postgres:"+pg_pass+"@localhost:5432/chat"}
     }
 
+// --------------- methods -------------
+
     var ctor = function() {
+
+
         this.setup = function() {
             for (table in tables) {
                 _doQuery('CREATE TABLE IF NOT EXISTS public.'+table+' ('+tables[table]+');');
             }
         }
+
+
         this.tables = {
             ORGANIZATION : 0,
             COURSE       : 1,
             TUTOR        : 2,
             CHAT         : 3
         }
-        this.Chat = {
 
-        }
+
         this.find = function(table, obj) {
             var qry;
             switch (table) {
@@ -54,8 +63,10 @@ var PgConnection = (function () {
                 default: // org
                     qry = "SELECT * FROM public.organization WHERE NAME LIKE '%"+obj.org+"%';"; 
             }
-            _doQuery(qry, function(result) { return result; })
+            _doQuery(qry, table, obj, function(res) { return res; })
         }
+
+
         this.create = function(table, obj) {
             var qry;
             switch (table) {
@@ -80,23 +91,64 @@ var PgConnection = (function () {
                 default:
                     qry = "INSERT INTO public.organization (name) VALUES ('"+obj.org+"');"
             }
-            _doQuery(qry, function(result) { return result; })
+            _doQuery(qry, table, obj, function(res) { return res; })
+        }
+
+        this.saveLog = function(obj, language, logObject) {
+
+        }
+
+        this.getLog = function(obj, language, callback) {
+            _doQuery("SELECT EXTRACT(EPOCH FROM start_time AT TIME ZONE 'UTC')::int AS start_time FROM chat where start_time > current_date;", callback);
         }
     }
 
-    var _doQuery = function _doQuery(qry, callback) {
+
+// -------------- helper functions ----------------
+
+    var _doQuery = function _doQuery(qry, table, obj, callback) {
         pg.connect(credentials.uri, function(err, client, done) {
             console.log(qry);
             var query = client.query(qry, function(err, result) {
                 if (err) { console.log("Error running query: " + err); }
                 console.log(">" + qry + "\n>>");
                 console.log(result);
-                if (callback != null)
-                    callback(result);
+                _parse(table, result, obj, callback);
                 done();
             });
         });
     }
+
+    var _parse = function _parse(table, dbObject, obj, callback) {
+        console.log("$ PARSE CALLED");
+        var ret  = [];
+        try {
+            for (var i = 0, l = dbObject.rows.length; i < l; i++) {
+                switch (table) {
+                    case 0: // org
+                    case 1: // course
+                    case 2: // tutor
+                        ret.push(dbObject.rows[i]['name']); 
+                        break;
+                    case 3:  // chat -- select stuff from *today*
+                        ret.push(dbObject.rows[i]['start_time']); 
+                        break;
+                    default: // nothing
+                }
+            }
+            //console.log("$ PARSED :")
+            console.log(ret);
+            //console.log("callback = ")
+            //console.log(callback)
+            //console.log("$ callback != 'undefined' && callback != null (" + (callback != 'undefined' && callback != null) + ") - " + (callback != 'undefined' && callback != null ? "calling with result" : "doing nothing"));
+            if (callback != 'undefined' && callback != null)
+                callback(ret);
+        } catch (err) { console.error(err); }
+
+        return ret;
+    }
+
+
     return ctor;
 })();
 
@@ -118,6 +170,8 @@ var server = http.createServer(function(req, res) {
     res.end(conn.find(conn.tables.COURSE, chatRoom));
     res.end(conn.find(conn.tables.TUTOR, chatRoom));
     res.end(conn.find(conn.tables.CHAT, chatRoom));
+    console.log("=====================================");
+    res.end(conn.find(conn.tables.ORGANIZATION, new Chat("b")));
 });
 
 
