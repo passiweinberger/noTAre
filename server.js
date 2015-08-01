@@ -7,7 +7,7 @@ var express = require('express'),
 	npid = require("npid"),
 	uuid = require('node-uuid'),
 	Room = require('./room.js'),
-	Chat = require('./Chat.js'),
+	Chat = require('./public/js/Chat.js'),
 	PgConnection = require('./pgconnection.js'),
 	pgConn = new PgConnection(),
 	//, cfEnv = require("cf-env")
@@ -184,10 +184,13 @@ io.sockets.on("connection", function (socket) {
 
 	// organization
 	socket.on("findOrganization", function (obj) {
+		console.log(obj);
+		console.log("socket emit = ");
+		console.log(socket.emit);
 		pgConn.find(
 			pgConn.tables.ORGANIZATION, 
 			obj,
-			socket.emit
+			socket
 		);
 	});
 	socket.on("selectOrganization", function (obj) {
@@ -197,7 +200,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.create(
 			pgConn.tables.ORGANIZATION, 
 			obj,
-			socket.emit
+			socket
 		);
 	});
 
@@ -206,7 +209,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.find(
 			pgConn.tables.COURSE, 
 			obj,
-			socket.emit
+			socket	
 		);
 	});
 	socket.on("selectCourse", function (obj) {
@@ -216,7 +219,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.create(
 			pgConn.tables.COURSE, 
 			obj,
-			socket.emit
+			socket
 		);
 	});
 
@@ -225,7 +228,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.find(
 			pgConn.tables.TUTOR, 
 			obj,
-			socket.emit
+			socket
 		);
 	});
 	socket.on("selectTutor", function (obj) {
@@ -235,7 +238,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.create(
 			pgConn.tables.TUTOR, 
 			obj,
-			socket.emit
+			socket
 		);
 	});
 
@@ -244,7 +247,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.find(
 			pgConn.tables.CHAT, 
 			obj,
-			socket.emit
+			socket
 		);
 	});
 	socket.on("selectChat", function (obj) {
@@ -254,7 +257,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.create(
 			pgConn.tables.CHAT, 
 			obj,
-			socket.emit
+			socket
 		);
 	});
 // --- EOF postgres backend

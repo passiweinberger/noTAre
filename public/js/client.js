@@ -812,7 +812,7 @@ $(document).ready(function () {
 		id: 2
 	}];
 
-	//	var chatRoom = new Chat("", "", "", "" + new Date().getTime());
+	var chatRoom = new Chat("", "", "", "");
 
 	$(".createHierarchy").click(function () {
 
@@ -836,19 +836,70 @@ $(document).ready(function () {
 		$(this).prev().focus();
 	});
 
+	var delay = (function(){
+	  var timer = 0;
+	  return function(callback, ms){
+	    clearTimeout (timer);
+	    timer = setTimeout(callback, ms);
+	  };
+	})();
+
 	$(".middleInput").on('keyup', function (e) {
+		delay(function () {
+			var str = $(".middleInput").val().toLowerCase();
 
-		var str = $(this).val().toLowerCase();
-		//chatRoom.setOrg($(this).val());
-		console.log(str);
+			if(chatRoom.org == ""){
+				chatRoom.setOrg(str);
+				socket.emit("findOrganization", chatRoom);
+			}
+			else if(chatRoom.course == ""){
+				chatRoom.setCourse(str);
+				socket.emit("findCourse", chatRoom);
+			}
+			
+		}, 500)
 
+	});
+
+	socket.on("foundOrganizations", function(data){
+		//chatRoom = data;		
+		$("#dropDownContainer ul").html("");
+		console.log(data);
+		for(var i = 0; i < data.org.length; i++){
+			$("#dropDownContainer ul").append("<li class='list-group-item'>" + data.org[i] + "</li>");
+
+		}
+	});
+
+
+	socket.on("foundCourse", function(data){
+		//chatRoom = data;		
+		$("#dropDownContainer ul").html("");
+		console.log(data);
+		for(var i = 0; i < data.course.length; i++){
+			$("#dropDownContainer ul").append("<li class='list-group-item'>" + data.course[i] + "</li>");
+
+		}
+	});
+
+	$("#dropDownContainer li").on('click',function(e){
+
+		if (chatRoom.org == "" || chatRoom.org instanceof Array) {
+		chatRoom.setOrg($(this).html());
+
+		} else if(chatRoom.course == "" || chatRoom.course instanceof Array) {
+					chatRoom.setCourse($(this).html());
+
+		} else if(chatRoom.tutor == "" || chatRoom.tutor instanceof Array) {
+					chatRoom.setTutor($(this).html());
+
+		} else { // chat / start_time
+			chatRoom.setStartTime($(this).html());
+		}
+		$(".middleInput").val("");
+		$("#chosenHierarchy ul").append("<li class='list-group-item'>" + $(this).html() + "</li>");
 
 		$("#dropDownContainer ul").html("");
-		elems.forEach(function (elem) {
-			if (elem.name.toLowerCase().contains(str)) {
-				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
-			}
-		});
 	});
 
 	// PICKADATE
