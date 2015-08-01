@@ -51,11 +51,11 @@ var PgConnection = (function () {
             var qry;
             switch (table) {
                 case 1: // course
-                    qry = "SELECT * FROM public.course WHERE NAME LIKE '%"+obj.course+"%' AND org_id = \
+                    qry = "SELECT * FROM public.course WHERE LOWER(name) LIKE LOWER('%"+obj.course+"%') AND org_id = \
                     (SELECT id FROM public.organization WHERE name = '"+obj.org+"');"; 
                     break;
                 case 2: // tutor
-                    qry = "SELECT * FROM public.tutor WHERE NAME LIKE '%"+obj.tutor+"%' AND course_id = \
+                    qry = "SELECT * FROM public.tutor WHERE LOWER(name) LIKE LOWER('%"+obj.tutor+"%') AND course_id = \
                     (SELECT id FROM public.course WHERE name = '"+obj.course+"' AND org_id = \
                         (SELECT id FROM public.organization WHERE name = '"+obj.org+"')\
                     );"; 
@@ -69,7 +69,7 @@ var PgConnection = (function () {
                     );"; 
                     break;
                 default: // org
-                    qry = "SELECT * FROM public.organization WHERE NAME LIKE '%"+obj.org+"%';"; 
+                    qry = "SELECT * FROM public.organization WHERE LOWER(name) LIKE LOWER('%"+obj.org+"%');"; 
             }
             _doQuery(qry, table, obj, callback);
         }
@@ -137,7 +137,7 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
 
     var _doQuery = function _doQuery(qry, table, obj, callback) {
         pg.connect(credentials.uri, function(err, client, done) {
-            //console.log(qry);
+            console.log(qry);
             var query = client.query(qry, function(err, result) {
                 if (err) { console.log("PGCONN: Error running query: " + err); }
                 //console.log(">" + qry + "\n>>");
@@ -149,7 +149,12 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
     }
 
     var _parse = function _parse(table, dbObject, obj, callback) {
-        //console.log("$ PARSE CALLED");
+        // console.log("$ PARSE CALLED for " + table);
+        // console.log(obj)
+        // console.log("callback = ")
+        // console.log(callback)
+        // console.log("dbObj = ")
+        // console.log(dbObject)
         var ret  = [];
         var emitTo;
         try {
@@ -157,30 +162,34 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
                 case 0: // org
                     emitTo = "foundOrganizations";
                     for (var i = 0, l = dbObject.rows.length; i < l; i++) {
+                        console.log("pushing: ");
+                        console.log(dbObject.rows[i]['name']);
                         ret.push(dbObject.rows[i]['name']); 
                     }
-                    obj.setOrg(ret);
+            console.log("RET = ");
+            console.log(ret);
+                    obj.org = ret;
                     break;
                 case 1: // course
                     emitTo = "foundCourses";
                     for (var i = 0, l = dbObject.rows.length; i < l; i++) {
                         ret.push(dbObject.rows[i]['name']); 
                     }
-                    obj.setCourse(ret);
+                    obj.course = ret;
                     break;
                 case 2: // tutor
-                    emitTo = "foundTutorss";
+                    emitTo = "foundTutors";
                     for (var i = 0, l = dbObject.rows.length; i < l; i++) {
                         ret.push(dbObject.rows[i]['name']); 
                     }
-                    obj.setTutor(ret);
+                    obj.tutor = ret;
                     break;
                 case 3:  // chat -- select stuff from *today*
                     emitTo = "foundChats";
                     for (var i = 0, l = dbObject.rows.length; i < l; i++) {
                         ret.push(dbObject.rows[i]['start_time']); 
                     }
-                    obj.setStartTime(ret);
+                    obj.start_time = ret;
                     break;
                 default: // logs
                     for (var i = 0, l = dbObject.rows.length; i < l; i++) {
@@ -192,12 +201,13 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
                 console.log("PGCONN: PARSED")
                 console.log(ret);
             }
-            //console.log("callback = ")
-            //console.log(callback)
             //console.log("$ callback != 'undefined' && callback != null (" + (callback != 'undefined' && callback != null) + ") - " + (callback != 'undefined' && callback != null ? "calling with result" : "doing nothing"));
-            if (callback != 'undefined' && callback != null)
-                callback(emitTo, obj);
-        } catch (err) { console.error(err); }
+            if (callback != 'undefined' && callback != null) {
+                console.log("emit to " + emitTo + " obj: ")//callback(emitTo, obj);
+                console.log(obj);
+                callback.emit(emitTo, obj);
+            }
+        } catch (err) { console.log(err); }
 
         return ret;
     }
