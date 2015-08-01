@@ -34,6 +34,7 @@
 	<script src="js/counter.js"></script>
 	<script src="js/Chat.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
+	<script src="js/Chat.js"></script>
 </head>
 
 
@@ -146,27 +147,29 @@
 					<div class="service-box">
 						<i class="fa fa-4x fa fa-graduation-cap wow bounceIn text-primary"></i>
 						<h3>Effizient studieren</h3>
-						<p class="text-muted">Neu an der Uni? Kein Problem, ob Ersti oder Erasmus-Student/-in</p>
+						<p class="text-muted">Neu an der Uni? Kein Problem, ob Ersti oder Erasmus-Student(-in) hier wirst du unterstützt & kannst anderen helfen.</p>
+						<p class="text-muted">Sprachprobleme spielen keine Rolle mehr!</p>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6 text-center">
 					<div class="service-box">
 						<i class="fa fa-4x fa-newspaper-o wow bounceIn text-primary" data-wow-delay=".1s"></i>
 						<h3>Am Ball bleiben</h3>
-						<p class="text-muted">Auch im Krankheitsfall live am Unterricht teilnehmen & die gesammelten Mitschriften speichern</p>
+						<p class="text-muted">Auch im Krankheitsfall live am Unterricht teilnehmen & die gesammelten Mitschriften speichern.</p>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6 text-center">
 					<div class="service-box">
 						<i class="fa fa-4x fa-comment wow bounceIn text-primary" data-wow-delay=".2s"></i>
 						<h3>Kollaborativ</h3>
-						<p class="text-muted">Gemeinsam eine Vorlesung dokumentieren & zeitgleich anonym Fragen stellen</p>
+						<p class="text-muted">Gemeinsam eine Vorlesung dokumentieren & zeitgleich anonym Fragen stellen.</p>
+
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6 text-center">
 					<div class="service-box">
 						<i class="fa fa-4x fa-paper-plane-o wow bounceIn text-primary" data-wow-delay=".3s"></i>
-						<h3>Simpel & Schnell</h3>
+						<h3>Simple & Schnell</h3>
 						<p class="text-muted">Mit wenigen Klicks einer Veranstalltung beitreten - ohne Registierung!</p>
 					</div>
 				</div>
@@ -185,12 +188,14 @@
 					<div class="col-lg-4 col-lg-offset-2 text-center">
 						<i class="fa fa-phone fa-3x wow bounceIn"></i>
 						<p>123-456-6789</p>
+						<i class="fa fa-github fa-3x wow bounceIn"></i>
+						<p><a href="https://github.com/passiweinberger/noTAre">Finde Uns auf Github und werde Teil von <b>noTAre!</b></a></p>
 					</div>
 					<div class="col-lg-4 text-center">
 						<i class="fa fa-envelope-o fa-3x wow bounceIn" data-wow-delay=".1s"></i>
 						<p><a href="mailto:support@notare.de">support@notare.de</a>
 						</p>
-						<p><a href="https://github.com/passiweinberger/noTAre">Finde Uns auf Github und werde Teil von noTAre!</a>
+
 						</p>
 					</div>
 				</div>
@@ -210,7 +215,7 @@
 						<span class="icon-bar"></span>
 						<span class="icon-bar"></span>
 					</button>
-					<a class="navbar-brand page-scroll" href="#page-top">Physik - Uni Mainz</a>
+					<a id="yourRoomName" class="navbar-brand page-scroll" href="#page-top"></a>
 				</div>
 
 
@@ -222,50 +227,57 @@
 						<li>
 							<a class="page-scroll" id="download_button"><i class="fa fa-download"></i></a>
 							<li>
-								<a href="#" class="page-scroll" id="translate_fr">FR</a>
+								<a href="#" onClick="return false;" class="page-scroll" id="translate_fr">FR</a>
 							</li>
 							<li>
-								<a href="#" class="page-scroll" id="translate_es">ES</a>
+								<a href="#" onClick="return false;" class="page-scroll" id="translate_es">ES</a>
 							</li>
 							<li>
-								<a href="#" class="page-scroll" id="translate_de">DE</a>
+								<a href="#" onClick="return false;" class="page-scroll" id="translate_de">DE</a>
 							</li>
 							<li>
-								<a href="#" class="page-scroll" id="translate_en">EN</a>
+								<a href="#" onClick="return false;" class="page-scroll" id="translate_en">EN</a>
 							</li>
+							<li>
+								<a href="#" onClick="return false;" class="page-scroll" id="translate_ru">RU</a>
+							</li>
+							<li>
+								<a href="#" onClick="return false;" class="page-scroll" id="translate_it">IT</a>
+							</li>
+
 					</ul>
 				</div>
 				<!-- /.navbar-collapse -->
 			</div>
 			<!-- /.container-fluid -->
 		</nav>
-        <div id="panel">
-		<div class="row" id="main-chat-screen">
-			<div class="col-md-3" style="display:none;">
-				<ul id="rooms" class="list-group"></ul>
-				<ul id="people" class="list-group"></ul>
-			</div>
-			<div class="col-md-6">
-				<div id="conversation">
-					<ul id="msgs" class="list-unstyled"></ul>
+		<div id="panel">
+			<div class="row" id="main-chat-screen">
+				<div class="col-md-3" style="display:none;">
+					<ul id="rooms" class="list-group"></ul>
+					<ul id="people" class="list-group"></ul>
 				</div>
-				<form id="chatForm" class="form-inline">
-					<div class="form-group">
-						<input type="text" class="input-lg" placeholder="Your message" id="msg">
-						<input type="submit" name="send" id="send" value=">" class="btn btn-success btn-lg">
+				<div class="col-md-6">
+					<div id="conversation">
+						<ul id="msgs" class="list-unstyled"></ul>
 					</div>
+					<form id="chatForm" class="form-inline">
+						<div class="form-group">
+							<input type="text" class="input-lg" placeholder="Your message" id="msg">
+							<input type="submit" name="send" id="send" value=">" class="btn btn-success btn-lg">
+						</div>
 
 
-				</form>
+					</form>
+				</div>
+				<div class="col-md-2">
+					<ul class="list-unstyled" id="updates"></ul>
+				</div>
 			</div>
-			<div class="col-md-2">
-				<ul class="list-unstyled" id="updates"></ul>
-			</div>
+			<!--<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#userModal">Open Modal</button>//-->
 		</div>
-		<!--<button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#userModal">Open Modal</button>//-->
-	</div>
 
-	<!-- Modal start
+		<!-- Modal start
 <div class="modal fade" id="roomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomLabel" aria-hidden="true">
 <div class="modal-dialog">
 <div class="modal-content">
@@ -285,50 +297,50 @@ You can create a chat room here. Names have to be unique.
 </div>
 </div>
 <!-- Modal end -->
-
-	<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="usernameLabel" aria-hidden="true">
-		<div class="modal-dialog">
-			<div class="modal-content">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h4 class="modal-title" id="createRoomLabel">Bentuzername</h4>
-				</div>
-				<div class="modal-body">
-					Bitte geben sie ihren Benutzernamen ein.
-					<form class="form-inline" id="usernameForm">
-						<input type="text" class="form-control input-lg" placeholder="Benutzername" id="username">
-					</form>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Schließe!</button>
-					<button data-dismiss="modal" id="usernameBtn" class="btn btn-success btn-lg">Sende!</button>
+		<!--<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="usernameLabel" aria-hidden="true"> -->
+		<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="usernameLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+						<h4 class="modal-title" id="createRoomLabel">Bentuzername</h4>
+					</div>
+					<div class="modal-body">
+						Bitte geben sie ihren Benutzernamen ein.
+						<form class="form-inline" id="usernameForm">
+							<input type="text" class="form-control input-lg" placeholder="Benutzername" id="username">
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Schließe!</button>
+						<button data-dismiss="modal" id="usernameBtn" class="btn btn-success btn-lg">Sende!</button>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
 
-	<script src="components/jquery/dist/jquery.js"></script>
-	<script src="components/bootstrap/dist/js/bootstrap.js"></script>
+		<script src="components/jquery/dist/jquery.js"></script>
+		<script src="components/bootstrap/dist/js/bootstrap.js"></script>
 
-	<!-- jQuery -->
-	<script src="js/jquery.js"></script>
+		<!-- jQuery -->
+		<script src="js/jquery.js"></script>
 
-	<!-- Bootstrap Core JavaScript -->
-	<script src="js/bootstrap.min.js"></script>
+		<!-- Bootstrap Core JavaScript -->
+		<script src="js/bootstrap.min.js"></script>
 
-	<!-- Plugin JavaScript -->
-	<script src="js/jquery.easing.min.js"></script>
-	<script src="js/jquery.fittext.js"></script>
-	<script src="js/wow.min.js"></script>
+		<!-- Plugin JavaScript -->
+		<script src="js/jquery.easing.min.js"></script>
+		<script src="js/jquery.fittext.js"></script>
+		<script src="js/wow.min.js"></script>
 
-	<script src="js/picker.js"></script>
-	<script src="js/picker.date.js"></script>
-	<script src="js/picker.time.js"></script>
+		<script src="js/picker.js"></script>
+		<script src="js/picker.date.js"></script>
+		<script src="js/picker.time.js"></script>
 
-	<!-- Custom Theme JavaScript -->
-	<script src="js/creative.js"></script>
-	<script src="js/client.js"></script>
+		<!-- Custom Theme JavaScript -->
+		<script src="js/creative.js"></script>
+		<script src="js/client.js"></script>
 </body>
 
 

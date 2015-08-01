@@ -42,7 +42,7 @@ function analyzeChat(messages) {
 			}
 		}
 		
-	}//);
+	});
 	return "der";
 };
 

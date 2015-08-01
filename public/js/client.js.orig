@@ -784,9 +784,12 @@ $(document).ready(function () {
 		id: 2
 	}];
 
+<<<<<<< HEAD
 	var chatRoom = new Chat("", "", "", "");
+=======
 
 	//var chatRoom = new Chat("", "", "", "");
+>>>>>>> 06fb93e9f82ba4099a911ea5b071aeab69a497b9
 
 	$(".createHierarchy").click(function () {
 
@@ -810,6 +813,7 @@ $(document).ready(function () {
 		$(this).prev().focus();
 	});
 
+<<<<<<< HEAD
 	var delay = (function(){
 	  var timer = 0;
 	  return function(callback, ms){
@@ -885,7 +889,41 @@ $(document).ready(function () {
 		$("#chosenHierarchy ul").append("<li class='list-group-item'>" + $(this).html() + "</li>");
 
 		$("#dropDownContainer ul").html("");
+=======
+
+	socket.on("posOrgas", function (e) {
+
+		/*$("#dropDownContainer ul").html("");
+	,	elems.forEach(function (elem) {
+			if (elem.name.toLowerCase().contains(str)) {
+				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
+			}
+		});*/
 	});
+
+
+
+	var delay = (function () {
+		var timer = 0;
+		return function (callback, ms) {
+			clearTimeout(timer);
+			timer = setTimeout(callback, ms);
+		}
+	});
+
+	/*
+	$(".middleInput").on('keyup', function (e) {
+
+		delay(function () {
+			var str = $(this).val().toLowerCase();
+			chatRoom.setOrg(str);
+			socket.emit("findOrganisation", str);
+			console.log(chatRoom);
+		}, 500)
+
+>>>>>>> 06fb93e9f82ba4099a911ea5b071aeab69a497b9
+	});
+	*/
 
 	// PICKADATE
 	$("#dob").pickadate({
@@ -893,5 +931,4 @@ $(document).ready(function () {
 		formatSubmit: 'mm/dd/yyyy',
 		hiddenName: true
 	});
-
 });
