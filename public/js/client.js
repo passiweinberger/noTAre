@@ -9,6 +9,32 @@ var recognizing = false;
 var lastmessages = []; // to be populated later
 var db, remoteCouch;
 
+var getUrlParameter = function getUrlParameter(sParam) {
+	var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+		sURLVariables = sPageURL.split('&'),
+		sParameterName,
+		i;
+
+	for (i = 0; i < sURLVariables.length; i++) {
+		sParameterName = sURLVariables[i].split('=');
+
+		if (sParameterName[0] === sParam) {
+			return sParameterName[1] === undefined ? true : sParameterName[1];
+		}
+	}
+};
+
+var roomID = getUrlParameter("roomID");
+
+// Test ob RoomID schon gesetzt ist?
+if (roomID != undefined) {
+	$("body").children().hide();
+	$("#chatPage").show();
+	//TODO: Go direct to chat-window
+}
+
+
+
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
 // var remoteCouch = cloudant_url + sessionID;
@@ -666,10 +692,6 @@ $(document).ready(function () {
 			}
 		});*/
 	});
-
-
-
-
 
 	// PICKADATE
 	$("#dob").pickadate({
