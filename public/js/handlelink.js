@@ -1,5 +1,5 @@
-var typer = require('./getType.js');
-var regexFile = require('./regex.js');
+//var typer = require('./getType.js');
+//var regexFile = require('./regex.js');
 
 
 String.prototype.splice = function( idx, rem, s ) {

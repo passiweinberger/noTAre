@@ -44,9 +44,9 @@ var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c
 
 var syncDom = document.getElementById('sync-wrapper');
 
-function makeCouchDB(lectureID) {
-	db = new PouchDB('' + lectureID);
-	remoteCouch = cloudant_url + lectureID;
+function makeCouchDB(roomName) {
+	db = new PouchDB('' + roomName);
+	remoteCouch = cloudant_url + roomName;
 	db.info(function (err, info) {
 		///*
 		db.changes({
@@ -422,10 +422,9 @@ $(document).ready(function () {
 		$("#createRoomForm").toggle();
 	});
 
-	/*$("#createRoomBtn").click(function () {
+	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
-		var roomName = $("#createRoomName").val();
-		//if (check(roomName)) {
+		var roomName = "abcdef"; //$("#createRoomName").val();
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
 			if (roomExists) {
@@ -434,16 +433,19 @@ $(document).ready(function () {
 				$("#errors").append("Session <i>" + roomName + "</i> already currently runs, please join it!");
 			} else {
 				if (roomName.length > 0) { //also check for roomname
-					makeCouchDB(roomName);
+					joining = false;
+          makeCouchDB(roomName);
 					socket.emit("createRoom", roomName);
 					$("#errors").empty();
 					$("#errors").hide();
+          
+          $("body").children().hide();
+          $("#chatPage").show();
 				}
 			}
 		});
-		//}
-	});*/
-
+	});
+  /*
 	$("#createRoomButton").on('click', function () {
 		var roomName = "abcdef"; //TODO:Random
 		joining = false;
@@ -453,6 +455,7 @@ $(document).ready(function () {
 		$("body").children().hide();
 		$("#chatPage").show();
 	});
+  */
 
 
 	/*$("#rooms").on('click', '.joinRoomBtn', function () {

@@ -1,5 +1,5 @@
-var linker = require('./handlelinks.js');
-var translator = require('./translator.js');
+//var linker = require('./handlelinks.js');
+//var translator = require('./translator.js');
 
 module.exports = {
 	parse: function(message,translated,language){
