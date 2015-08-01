@@ -10,6 +10,7 @@ var lastmessages = []; // to be populated later
 var db, remoteCouch;
 var roomName;
 var joining = true;
+var suggest_wiki = false;
 
 
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -183,6 +184,10 @@ function redrawChat(messages) {
 		li.appendChild(pMessage);
 		li.className = "list-group-item";
 		ul.appendChild(li);
+		// suggest a wiki artikle: TODO
+		if (suggest_wiki) {
+			suggest_Wiki(messages);
+		}
 	});
 }
 
@@ -204,6 +209,10 @@ function translateMsgs(messages, language) {
 		li.appendChild(pMessage);
 		li.className = "list-group-item";
 		ul.appendChild(li);
+		// suggest a wiki artikle: TODO
+		if (suggest_wiki) {
+			suggest_Wiki(messages);
+		}
 	});
 }
 
