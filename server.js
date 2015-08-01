@@ -7,9 +7,9 @@ var express = require('express'),
 	npid = require("npid"),
 	uuid = require('node-uuid'),
 	Room = require('./room.js'),
-	PgConnection = require('./pgconnection.js')
+	//PgConnection = require('./pgconnection.js')
 	//, cfEnv = require("cf-env")
-	,
+	//,
 	_ = require('underscore')._;
 
 app.configure(function () {

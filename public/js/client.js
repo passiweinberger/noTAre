@@ -29,8 +29,6 @@ var getUrlParameter = function getUrlParameter(sParam) {
 var roomID = getUrlParameter("roomID");
 
 
-
-
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
 // var remoteCouch = cloudant_url + roomName;
@@ -329,7 +327,7 @@ $(document).ready(function () {
 		$("body").children().hide();
 		$("#chatPage").show();
 		$("#main-chat-screen").show();
-		$('#userModal').modal('show');
+		//$('#userModal').modal('show');
 		socket.emit("joinRoom", roomID);
 		//TODO: Ask for Username
 	}
@@ -471,7 +469,7 @@ $(document).ready(function () {
 					$("body").children().hide();
 					$("#chatPage").show();
 					$("#main-chat-screen").show();
-					$('#userModal').modal('show');
+					//$('#userModal').modal('show');
 				}
 			}
 		});
