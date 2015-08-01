@@ -27,7 +27,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
 };
 
 var roomID = getUrlParameter("roomID");
-
+var MyName;
 
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
@@ -79,7 +79,7 @@ function exportToCsv(filename, rows) {
 	/*
 	var message = {
 			_id: new Date().toISOString(), //required
-			name: $("#name"),
+			name: $("#username"),
 			time: nowTime,
 			message: msg
 	};
@@ -137,7 +137,7 @@ function downloadMessages(roomName) {
 			/*
 			var message = {
 				_id: new Date().toISOString(), //required
-				name: $("#name"),
+				name: $("#username"),
 				time: nowTime,
 				message: msg
 			};
@@ -257,7 +257,7 @@ function startButton(event) {
 Functions
 */
 function toggleNameForm() {
-	$("#login-screen").toggle();
+	$("#userModal").toggle();
 }
 
 function toggleChatWindow() {
@@ -333,9 +333,10 @@ $(document).ready(function () {
 		$("body").children().hide();
 		$("#chatPage").show();
 		$("#main-chat-screen").show();
-		//$('#userModal').modal('show');
 		socket.emit("joinRoom", roomID);
 		//TODO: Ask for Username
+		$('#userModal').modal('show');
+		$("#username").focus();
 	}
 
 
@@ -352,35 +353,35 @@ $(document).ready(function () {
 
 	$("#main-chat-screen").hide();
 	$("#errors").hide();
-	$("#name").focus();
+	$("#username").focus();
 	$("#join").attr('disabled', 'disabled');
 
-	if ($("#name").val() === "") {
+	if ($("#username").val() === "") {
 		$("#join").attr('disabled', 'disabled');
 	}
 
 	//enter screen
-	$("#nameForm").submit(function () {
-		var name = $("#name").val();
+	$("#usernameForm").submit(function () {
+		MyName = $("#username").val(); 
 		var device = "desktop";
 		if (navigator.userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile/i)) {
 			device = "mobile";
 		}
-		if (name === "" || name.length < 2) {
+		if (MyName === "" || MyName.length < 2) {
 			$("#errors").empty();
-			$("#errors").append("Please enter a name");
+			$("#errors").append("Bitte gebe einen username ein!");
 			$("#errors").show();
 		} else {
-			socket.emit("joinserver", name, device);
+			socket.emit("joinserver", MyName, device);
 			toggleNameForm();
 			toggleChatWindow();
 			$("#msg").focus();
 		}
 	});
 
-	$("#name").keypress(function (e) {
-		var name = $("#name").val();
-		if (name.length < 2) {
+	$("#username").keypress(function (e) {
+		MyName = $("#username").val();
+		if (MyName.length < 2) {
 			$("#join").attr('disabled', 'disabled');
 		} else {
 			$("#errors").empty();
@@ -397,7 +398,7 @@ $(document).ready(function () {
 			var nowTime = new Date().getTime();
 			var message = {
 				_id: new Date().toISOString(), //required
-				name: 'user',
+				name: MyName, //'user', //TODO
 				time: nowTime,
 				message: msg
 			};
@@ -530,7 +531,7 @@ $(document).ready(function () {
 				/*
 				var message = {
 					_id: new Date().toISOString(), //required
-					name: $("#name"),
+					name: $("#username"),
 					time: nowTime,
 					message: msg
 				};
@@ -551,7 +552,7 @@ $(document).ready(function () {
 				/*
 				var message = {
 					_id: new Date().toISOString(), //required
-					name: $("#name"),
+					name: $("#username"),
 					time: nowTime,
 					message: msg
 				};
@@ -572,7 +573,7 @@ $(document).ready(function () {
 				/*
 				var message = {
 					_id: new Date().toISOString(), //required
-					name: $("#name"),
+					name: $("#username"),
 					time: nowTime,
 					message: msg
 				};
@@ -593,7 +594,7 @@ $(document).ready(function () {
 				/*
 				var message = {
 					_id: new Date().toISOString(), //required
-					name: $("#name"),
+					name: $("#username"),
 					time: nowTime,
 					message: msg
 				};
