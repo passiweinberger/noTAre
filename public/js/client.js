@@ -161,8 +161,8 @@ function readMessages() {
 
 function redrawChat2(messages) {
 	$("#msgs").val('');
-	messages.forEach(function (msg) {
-		$("#msgs").append("<li><span class='text-warning'>" + msg.doc.message + '\n' + handlelink(msg.doc.message) + "</span></li>"); // msg.doc.message
+	messages.forEach(function (message) {
+		$("#msgs").append("<li><span class='text-warning'>" + message.doc.message + '\n' + handlelink(message.doc.message) + "</span></li>"); // msg.doc.message
 	});
 }
 
@@ -175,7 +175,7 @@ function redrawChat(messages) {
 		var pMessage = document.createElement("p");
 
 		pName.textContent = message.doc.name;
-		pMessage.textContent = msg.doc.message + '\n' + handlelink(msg.doc.message); //message.doc.message;
+		pMessage.textContent = message.doc.message + '\n' + handlelink(message.doc.message); //message.doc.message;
 		pName.className = "text-danger";
 
 		li.appendChild(pName);
@@ -186,7 +186,6 @@ function redrawChat(messages) {
 }
 
 function translateMsgs(messages, language) {
-	// TODO
 	var translated_msg;
 	var ul = document.getElementById('msgs');
 	ul.innerHTML = '';
