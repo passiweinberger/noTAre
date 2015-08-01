@@ -824,19 +824,29 @@ $(document).ready(function () {
 		$(this).prev().focus();
 	});
 
+
+	socket.on("posOrgas", function (e) {
+
+		/*$("#dropDownContainer ul").html("");
+		elems.forEach(function (elem) {
+			if (elem.name.toLowerCase().contains(str)) {
+				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
+			}
+		});*/
+	});
+
 	$(".middleInput").on('keyup', function (e) {
 
 		var str = $(this).val().toLowerCase();
 		//chatRoom.setOrg($(this).val());
 		console.log(str);
+		/*
+		
+		socket.emit("findOrganisation",str);
+			
+		*/
 
 
-		$("#dropDownContainer ul").html("");
-		elems.forEach(function (elem) {
-			if (elem.name.toLowerCase().contains(str)) {
-				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
-			}
-		});
 	});
 
 	// PICKADATE
