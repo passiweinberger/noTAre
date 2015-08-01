@@ -8,6 +8,7 @@ var final_transcript = '';
 var recognizing = false;
 var lastmessages = []; // to be populated later
 var db, remoteCouch;
+var roomName;
 var joining = true;
 
 
@@ -26,7 +27,7 @@ var getUrlParameter = function getUrlParameter(sParam) {
 	}
 };
 
-var roomID = getUrlParameter("roomID");
+//var roomName = getUrlParameter("roomID");
 var MyName;
 
 //IMPORTANT: CONFIGURE remoteCouch with your own details
@@ -326,17 +327,17 @@ $(document).ready(function () {
 	// setup "global" variables first
 	// TODO PORT??
 	var socket = io(); // io.connect("{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); // process.env.CF_INSTANCE_ADDR // "75.126.81.66:3000" or for local runs: 127.0.0.1:3000
-	var myRoomID = null;
+	roomName = getUrlParameter("roomID");
 
 	// Test ob RoomID schon gesetzt ist?
-	if (roomID != undefined) {
+	if (roomName != undefined) {
 		$("body").children().hide();
 		$("#chatPage").show();
 		$("#main-chat-screen").show();
-		socket.emit("joinRoom", roomID);
+		socket.emit("joinRoom", roomName);
 		//TODO: Ask for Username
-		$('#userModal').modal('show');
-		$("#username").focus();
+		//$('#userModal').modal('show');
+		//$("#username").focus();
 	}
 
 
@@ -426,7 +427,7 @@ $(document).ready(function () {
 
 	$("#msg").keypress(function (e) {
 		if (e.which !== 13) {
-			if (myRoomID !== null && $("#msg").is(":focus")) {
+			if (roomName !== null && $("#msg").is(":focus")) {
 				typing = true;
 				socket.emit("typing", true);
 			} else {
@@ -447,13 +448,13 @@ $(document).ready(function () {
 		}
 	});
 
-	$("#showCreateRoom").click(function () {
-		$("#createRoomForm").toggle();
-	});
+	//$("#showCreateRoom").click(function () {
+	//	$("#createRoomForm").toggle();
+	//});
 
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
-		var roomName = "abfddf_test1"; //$("#createRoomName").val(); 
+		var roomName = $("#createRoomName").val(); //"abfddf_test1c";
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
 			if (roomExists) {
@@ -501,23 +502,24 @@ $(document).ready(function () {
 		socket.emit("joinRoom", roomID);
 	});*/
 
+/*
 	$("#rooms").on('click', '.removeRoomBtn', function () {
 		var roomName = $(this).siblings("span").text();
 		var roomID = $(this).attr("id");
 		socket.emit("removeRoom", roomID);
 		$("#createRoom").show();
 	});
+*/
 
 	$("#leave").click(function () {
-		var roomID = myRoomID;
-		socket.emit("leaveRoom", roomID);
+		socket.emit("leaveRoom", roomName);
 		$("#createRoom").show();
 	});
 
 	$("#download").click(function () {
 		// download from couchDB: TODO
-		// socket.emit('download', myRoomID);
-		downloadMessages(myRoomID);
+		// socket.emit('download', roomName);
+		downloadMessages(roomName);
 	});
 
 	//  TRANSLATIONS: TODO
@@ -777,9 +779,9 @@ $(document).ready(function () {
 	});
 
 	socket.on("sendRoomID", function (data) {
-		myRoomID = data.id;
+		roomName = data.id;
 		if (joining == false) {
-			socket.emit("joinRoom", myRoomID);
+			socket.emit("joinRoom", roomName);
 		}
 	});
 
