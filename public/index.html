@@ -86,7 +86,7 @@
 					<h2 class="section-heading">Wir haben die Lösung!</h2>
 					<!--...was du brauchst-->
 					<hr class="light">
-					<p class="text-faded">Mit noTAre bilden Studenten eine Einheit. Bekomme schnelle anonyme Hilfestellungen unabhänig von spachlichen Barrieren.</p>
+					<p class="text-faded">Mit noTAre bilden Studenten eine Einheit & bekommen schnelle anonyme Hilfestellungen, unabhänig von spachlichen Barrieren.</p>
 					<a href="#createRoom" class="btn btn-default btn-xl page-scroll">Erstellen</a>
 				</div>
 			</div>
@@ -144,7 +144,7 @@
 					<div class="service-box">
 						<i class="fa fa-4x fa fa-graduation-cap wow bounceIn text-primary"></i>
 						<h3>Effizient studieren</h3>
-						<p class="text-muted"></p>
+						<p class="text-muted">Neu an der Uni? Kein Problem, ob Ersti oder Erasmus-Student/-in</p>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-6 text-center">
@@ -220,16 +220,16 @@
 						<li>
 							<a class="page-scroll" id="download_button"><i class="fa fa-download"></i></a>
 							<li>
-								<button type="button" class="page-scroll" id="translate_fr">FR</button>
+								<a href="#" class="page-scroll" id="translate_fr">FR</a>
 							</li>
 							<li>
-								<button type="button" class="page-scroll" id="translate_es">ES</button>
+								<a href="#" class="page-scroll" id="translate_es">ES</a>
 							</li>
 							<li>
-								<button type="button" class="page-scroll" id="translate_de">DE</button>
+								<a href="#" class="page-scroll" id="translate_de">DE</a>
 							</li>
 							<li>
-								<button type="button" class="page-scroll" id="translate_en">EN</button>
+								<a href="#" class="page-scroll" id="translate_en">EN</a>
 							</li>
 					</ul>
 				</div>
@@ -237,16 +237,15 @@
 			</div>
 			<!-- /.container-fluid -->
 		</nav>
-
+        <div id="panel">
 		<div class="row" id="main-chat-screen">
-			<div class="col-md-3">
+			<div class="col-md-3" style="display:none;">
 				<ul id="rooms" class="list-group"></ul>
 				<ul id="people" class="list-group"></ul>
 			</div>
 			<div class="col-md-6">
 				<div id="conversation">
 					<ul id="msgs" class="list-unstyled"></ul>
-
 				</div>
 				<form id="chatForm" class="form-inline">
 					<div class="form-group">
@@ -285,7 +284,7 @@ You can create a chat room here. Names have to be unique.
 </div>
 <!-- Modal end -->
 
-	<!--<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="usernameLabel" aria-hidden="true">
+	<div class="modal fade" id="userModal" tabindex="-1" role="dialog" aria-labelledby="usernameLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -299,12 +298,12 @@ You can create a chat room here. Names have to be unique.
 					</form>
 				</div>
 				<div class="modal-footer">
-					<button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Close</button>
-					<button data-dismiss="modal" id="usernameBtn" class="btn btn-success btn-lg">Submit</button>
+					<button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Schließe!</button>
+					<button data-dismiss="modal" id="usernameBtn" class="btn btn-success btn-lg">Sende!</button>
 				</div>
 			</div>
 		</div>
-	</div>//-->
+	</div>
 
 
 	<script src="components/jquery/dist/jquery.js"></script>
