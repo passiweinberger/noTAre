@@ -1,8 +1,8 @@
 var Zaehler = 0;
 var apiKey = 'AIzaSyBGHTap5VyGBCdAqpl7ltMk-Vf8Yl2rC-Y';
 var xmlhttp = new XMLHttpRequest();
-module.exports = {
-  translate: function(target, sourceText) {
+
+var translate = function(target, sourceText) {
     if (Zaehler + sourceText.length < 10000000) {
       var source = 'https://www.googleapis.com/language/translate/v2/detect?key=' + apiKey + '&q=' + sourceText;
       xmlhttp.onreadystatechange = function()
@@ -40,5 +40,5 @@ module.exports = {
     {
       return sourceText;
     }
-  }
 }
+

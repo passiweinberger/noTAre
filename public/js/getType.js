@@ -1,5 +1,4 @@
-module.exports = {
-	gettype: function(url){
+var gettype = function(url){
 		var type = 'datei';
         if (url.match(/\.(jpeg|jpg|gif|png)$/) != null){
         	type = 'bild';
@@ -10,4 +9,3 @@ module.exports = {
 //		var type = document.getElementById(url).files[0].type;
 		return type;
 	}
-}

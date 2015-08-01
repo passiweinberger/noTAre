@@ -40,7 +40,7 @@ if (roomID != undefined) {
 
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
-// var remoteCouch = cloudant_url + sessionID;
+// var remoteCouch = cloudant_url + roomName;
 
 var syncDom = document.getElementById('sync-wrapper');
 
@@ -55,6 +55,7 @@ function makeCouchDB(roomName) {
 			live: true,
 			onChange: readMessages
 		});
+    //.on('change', readMessages);
 		//*/
 	});
 	if (remoteCouch) {
