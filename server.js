@@ -293,7 +293,7 @@ io.sockets.on("connection", function (socket) {
 	});
 
 	// download files: TODO
-	//socket.on("download", function(roomID) {
+	//socket.on('download', function(roomID) {
 	//});
 
 	socket.on("joinRoom", function (id) {
