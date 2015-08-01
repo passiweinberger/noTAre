@@ -26,12 +26,12 @@
 	<script src="js/pouchdb-3.6.0.min.js"></script>
 	<script src="components/jquery/dist/jquery.js"></script>
 	<script src="components/bootstrap/dist/js/bootstrap.js"></script>
-  <script src="js/regex.js"></script>
-  <script src="js/getType.js"></script>
-  <script src="js/handlelink.js"></script>
-  <script src="js/translator.js"></script>
-  <script src="js/parser.js"></script>
-  <script src="js/translator.js"></script>
+	<script src="js/regex.js"></script>
+	<script src="js/getType.js"></script>
+	<script src="js/handlelink.js"></script>
+	<script src="js/translator.js"></script>
+	<script src="js/parser.js"></script>
+	<script src="js/translator.js"></script>
 	<script src="/socket.io/socket.io.js"></script>
 </head>
 
@@ -120,6 +120,10 @@
 					</form>
 
 					<button id="createRoomButton">(Create Room)</button>
+					<div id="sync-wrapper">
+						<div id="sync-success" class="alert alert-success">Status: sync working. Be patient.</div>
+						<div id="sync-error" class="alert alert-danger">Status: sync failed. Try refreshing the page.</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -699,7 +699,7 @@ $(document).ready(function () {
 	$(".middleInput").on('keyup', function (e) {
 
 		//var str = $(this).val().toLowerCase();
-		chatRoom.setOrg($(this).val());
+		//chatRoom.setOrg($(this).val());
 		console.log(chatRoom);
 
 		/*$("#dropDownContainer ul").html("");
