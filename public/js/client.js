@@ -28,15 +28,6 @@ var getUrlParameter = function getUrlParameter(sParam) {
 
 var roomID = getUrlParameter("roomID");
 
-// Test ob RoomID schon gesetzt ist?
-if (roomID != undefined) {
-	$("body").children().hide();
-	$("#chatPage").show();
-	socket.emit("joinRoom", roomID);
-	//TODO: Ask for Username
-}
-
-
 
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
@@ -55,7 +46,7 @@ function makeCouchDB(roomName) {
 			live: true,
 			onChange: readMessages
 		});
-    //.on('change', readMessages);
+		//.on('change', readMessages);
 		//*/
 	});
 	if (remoteCouch) {
@@ -338,6 +329,18 @@ $(document).ready(function () {
 	var socket = io(); // io.connect("{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); // process.env.CF_INSTANCE_ADDR // "75.126.81.66:3000" or for local runs: 127.0.0.1:3000
 	var myRoomID = null;
 
+	// Test ob RoomID schon gesetzt ist?
+	if (roomID != undefined) {
+		$("body").children().hide();
+		$("#chatPage").show();
+		$("#main-chat-screen").show();
+		//$('#userModal').modal('show');
+		socket.emit("joinRoom", roomID);
+		//TODO: Ask for Username
+	}
+
+
+
 	$("form").submit(function (event) {
 		event.preventDefault();
 	});
@@ -389,32 +392,27 @@ $(document).ready(function () {
 
 	//main chat screen
 	$("#chatForm").submit(function () {
-		if (myRoomID !== null) {
-			var msg = $("#msg").val();
-			if (msg !== "") {
-				var nowTime = new Date().getTime();
-				var message = {
-					_id: new Date().toISOString(), //required
-					name: $("#name"),
-					time: nowTime,
-					message: msg
-				};
-				socket.emit("send", nowTime, message);
-				db.put(message, function callback(err, result) {
-					if (!err) {
-						console.log('Successfully uploaded to couchDB!');
-					} else {
-						console.log(err);
-					}
-				});
-				$("#msg").val("");
-			}
-		} else {
-			$("#errors").empty();
-			$("#errors").show();
-			$("#errors").append("Du musst in einer Vorlesung sein um zu chatten!");
-			$("#createRoom").show();
+
+		var msg = $("#msg").val();
+		if (msg !== "") {
+			var nowTime = new Date().getTime();
+			var message = {
+				_id: new Date().toISOString(), //required
+				name: 'user',
+				time: nowTime,
+				message: msg
+			};
+			socket.emit("send", nowTime, message);
+			db.put(message, function callback(err, result) {
+				if (!err) {
+					console.log('Successfully uploaded to couchDB!');
+				} else {
+					console.log(err);
+				}
+			});
+			$("#msg").val("");
 		}
+
 	});
 
 	//'is typing' message
@@ -465,17 +463,22 @@ $(document).ready(function () {
 			} else {
 				if (roomName.length > 0) { //also check for roomname
 					joining = false;
-          			makeCouchDB(roomName);
+
+					makeCouchDB(roomName);
 					socket.emit("createRoom", roomName);
 					$("#errors").empty();
 					$("#errors").hide();
-          			$("body").children().hide();
-          			$("#chatPage").show();
+
+					$("body").children().hide();
+					$("#chatPage").show();
+					$("#main-chat-screen").show();
+					//$('#userModal').modal('show');
+
 				}
 			}
 		});
 	});
-  /*
+	/*
 	$("#createRoomButton").on('click', function () {
 		var roomName = "abfddf_test1"; //$("#createRoomName").val(); 
 
@@ -823,16 +826,17 @@ $(document).ready(function () {
 
 	$(".middleInput").on('keyup', function (e) {
 
-		//var str = $(this).val().toLowerCase();
+		var str = $(this).val().toLowerCase();
 		//chatRoom.setOrg($(this).val());
-		//console.log(chatRoom);
+		console.log(str);
 
-		/*$("#dropDownContainer ul").html("");
+
+		$("#dropDownContainer ul").html("");
 		elems.forEach(function (elem) {
 			if (elem.name.toLowerCase().contains(str)) {
 				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
 			}
-		});*/
+		});
 	});
 
 	// PICKADATE
