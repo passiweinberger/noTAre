@@ -161,8 +161,8 @@ function readMessages() {
 
 function redrawChat2(messages) {
 	$("#msgs").val('');
-	messages.forEach(function (msg) {
-		$("#msgs").append("<li><span class='text-warning'>" + msg.doc.message + '\n' + handlelink(msg.doc.message) + "</span></li>"); // msg.doc.message
+	messages.forEach(function (message) {
+		$("#msgs").append("<li><span class='text-warning'>" + message.doc.message + '\n' + handlelink(message.doc.message) + "</span></li>"); // msg.doc.message
 	});
 }
 
@@ -186,7 +186,6 @@ function redrawChat(messages) {
 }
 
 function translateMsgs(messages, language) {
-	// TODO
 	var translated_msg;
 	var ul = document.getElementById('msgs');
 	ul.innerHTML = '';
@@ -516,6 +515,7 @@ $(document).ready(function () {
 
 	$("#download").click(function () {
 		// download from couchDB: TODO
+		// socket.emit('download', myRoomID);
 		downloadMessages(myRoomID);
 	});
 
