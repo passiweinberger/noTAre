@@ -47,7 +47,7 @@ var PgConnection = (function () {
         }
 
 
-        this.find = function(table, obj) {
+        this.find = function(table, obj, callback) {
             var qry;
             switch (table) {
                 case 1: // course
@@ -71,11 +71,11 @@ var PgConnection = (function () {
                 default: // org
                     qry = "SELECT * FROM public.organization WHERE NAME LIKE '%"+obj.org+"%';"; 
             }
-            _doQuery(qry, table, obj, function(res) { return res; })
+            _doQuery(qry, table, obj, callback);
         }
 
 
-        this.create = function(table, obj) {
+        this.create = function(table, obj, callback) {
             var qry;
             switch (table) {
                 case 1:
@@ -102,7 +102,7 @@ var PgConnection = (function () {
                 default:
                     qry = "INSERT INTO public.organization (name) VALUES ('"+obj.org+"');"
             }
-            _doQuery(qry, table, obj, function(res) { return res; })
+            _doQuery(qry, table, obj, callback);
         }
 
         this.saveLog = function(obj, language, logObject) {
@@ -151,21 +151,42 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
     var _parse = function _parse(table, dbObject, obj, callback) {
         console.log("$ PARSE CALLED");
         var ret  = [];
+        var emitTo;
         try {
-            for (var i = 0, l = dbObject.rows.length; i < l; i++) {
-                switch (table) {
-                    case 0: // org
-                    case 1: // course
-                    case 2: // tutor
+            switch (table) {
+                case 0: // org
+                    emitTo = "foundOrganizations";
+                    for (var i = 0, l = dbObject.rows.length; i < l; i++) {
                         ret.push(dbObject.rows[i]['name']); 
-                        break;
-                    case 3:  // chat -- select stuff from *today*
+                    }
+                    obj.setOrg(ret);
+                    break;
+                case 1: // course
+                    emitTo = "foundCourses";
+                    for (var i = 0, l = dbObject.rows.length; i < l; i++) {
+                        ret.push(dbObject.rows[i]['name']); 
+                    }
+                    obj.setCourse(ret);
+                    break;
+                case 2: // tutor
+                    emitTo = "foundTutorss";
+                    for (var i = 0, l = dbObject.rows.length; i < l; i++) {
+                        ret.push(dbObject.rows[i]['name']); 
+                    }
+                    obj.setTutor(ret);
+                    break;
+                case 3:  // chat -- select stuff from *today*
+                    emitTo = "foundStartTimes";
+                    for (var i = 0, l = dbObject.rows.length; i < l; i++) {
                         ret.push(dbObject.rows[i]['start_time']); 
-                        break;
-                    default: // logs
+                    }
+                    obj.setStartTime(ret);
+                    break;
+                default: // logs
+                    for (var i = 0, l = dbObject.rows.length; i < l; i++) {
                         ret.push(dbObject.rows[i]['data']); 
-                        break;
-                }
+                    }
+                    break;
             }
             //console.log("$ PARSED :")
             console.log(ret);
@@ -173,7 +194,7 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
             //console.log(callback)
             //console.log("$ callback != 'undefined' && callback != null (" + (callback != 'undefined' && callback != null) + ") - " + (callback != 'undefined' && callback != null ? "calling with result" : "doing nothing"));
             if (callback != 'undefined' && callback != null)
-                callback(ret);
+                callback(emitTo, obj);
         } catch (err) { console.error(err); }
 
         return ret;

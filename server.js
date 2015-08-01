@@ -7,7 +7,9 @@ var express = require('express'),
 	npid = require("npid"),
 	uuid = require('node-uuid'),
 	Room = require('./room.js'),
-	//PgConnection = require('./pgconnection.js')
+	Chat = require('./Chat.js'),
+	PgConnection = require('./pgconnection.js'),
+	pgConn = new PgConnection(),
 	//, cfEnv = require("cf-env")
 	//,
 	_ = require('underscore')._;
@@ -17,6 +19,7 @@ app.configure(function () {
 	// app.set('ipaddr', process.env.VCAP_APP_HOST || "127.0.0.1"); // process.env.CF_INSTANCE_IP
 	// console.log('Apps IP Adress: ' + app.get('ipaddr'));
 	// console.log('Apps PORT: ' + app.get('port'));
+	pgConn.setup();
 	app.use(express.bodyParser());
 	app.use(express.methodOverride());
 	app.use(express.static(__dirname + '/public'));
@@ -176,6 +179,85 @@ io.sockets.on("connection", function (socket) {
 			people: people
 		});
 	});
+
+// --- postgres backend
+
+	// organization
+	socket.on("findOrganization", function (obj) {
+		pgConn.find(
+			pgConn.tables.ORGANIZATION, 
+			obj,
+			socket.emit("foundOrganizations", obj);
+		);
+	});
+	socket.on("selectOrganization", function (obj) {
+		// SET LOCAL OBJECT FOR USER
+	});
+	socket.on("createOrganization", function (obj) {
+		pgConn.create(
+			pgConn.tables.ORGANIZATION, 
+			obj,
+			socket.emit
+		);
+	});
+
+	// course
+	socket.on("findCourse", function (obj) {
+		pgConn.find(
+			pgConn.tables.COURSE, 
+			obj,
+			socket.emit
+		);
+	});
+	socket.on("selectCourse", function (obj) {
+
+	});
+	socket.on("createCourse", function (obj) {
+		pgConn.create(
+			pgConn.tables.COURSE, 
+			obj,
+			socket.emit
+		);
+	});
+
+	// tutor
+	socket.on("findTutor", function (obj) {
+		pgConn.find(
+			pgConn.tables.TUTOR, 
+			obj,
+			socket.emit
+		);
+	});
+	socket.on("selectTutor", function (obj) {
+
+	});
+	socket.on("createTutor", function (obj) {
+		pgConn.create(
+			pgConn.tables.TUTOR, 
+			obj,
+			socket.emit
+		);
+	});
+
+	// chat
+	socket.on("findChat", function (obj) {
+		pgConn.find(
+			pgConn.tables.CHAT, 
+			obj,
+			socket.emit
+		);
+	});
+	socket.on("selectChat", function (obj) {
+
+	});
+	socket.on("createChat", function (obj) {
+		pgConn.create(
+			pgConn.tables.CHAT, 
+			obj,
+			socket.emit
+		);
+	});
+// --- EOF postgres backend
 
 	socket.on("countryUpdate", function (data) { // we know which country the user is from
 		country = data.country.toLowerCase();
