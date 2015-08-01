@@ -533,6 +533,28 @@ $(document).ready(function () {
 		});
 	});
 
+	$("#translate_es").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				/*
+				var message = {
+					_id: new Date().toISOString(), //required
+					name: $("#name"),
+					time: nowTime,
+					message: msg
+				};
+				*/
+				//exportToCsv(filename, doc.rows);
+				translateMsgs(messages, 'es');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
 	$("#translate_fr").click(function () {
 		db.allDocs({
 			include_docs: true,
