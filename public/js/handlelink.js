@@ -1,6 +1,3 @@
-//var typer = require('./getType.js');
-//var regexFile = require('./regex.js');
-
 
 String.prototype.splice = function( idx, rem, s ) {
     return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
@@ -51,7 +48,7 @@ var handlelink = function(text){
 		var parsed = parseTextToLinks(text);
 		if (parsed.indexOf('<a href=\"') != -1){
 			var link = parsed.slice(parsed.indexOf('<a href=\"') + 9,parsed.indexOf('\"  target=\"_blank\"'));
-			var type = typer.gettype(link);
+			var type = gettype(link);
 			switch(type) {
  				case 'bild':
      		   		return parsed + "<a href='"+link+"'><img src='"+link+"'></img></a>";
@@ -78,4 +75,3 @@ var handlelink = function(text){
 			}
 		}
 }
-

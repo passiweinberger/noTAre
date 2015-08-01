@@ -439,6 +439,7 @@ $(document).ready(function () {
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
 		var roomName = $("#createRoomName").val(); //"abfddf_test1c";
+		$("#yourRoomName").innerHTML = roomName;
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
 			if (roomExists) {
@@ -521,6 +522,33 @@ $(document).ready(function () {
 			}
 		});
 	});
+
+	$("#translate_it").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				translateMsgs(messages, 'it');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
+	$("#translate_ru").click(function () {
+		db.allDocs({
+			include_docs: true,
+			descending: true
+		}, function (err, doc) {
+			if (!err) {
+				translateMsgs(messages, 'ru');
+			} else {
+				console.log(err);
+			}
+		});
+	});
+
 
 	$("#translate_es").click(function () {
 		db.allDocs({
