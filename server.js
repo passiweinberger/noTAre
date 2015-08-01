@@ -30,19 +30,18 @@ app.configure(function () {
 app.get('/', function (req, res) {
 	res.render('index.html');
 });
-/*
 
-var pgConn = new PgConnection();
+
+
+/*var pgConn = new PgConnection();
 
 var Chat = module.require('./Chat.js');
 var chatRoom = new Chat("Mainz", "Hac", "P", "" + new Date().getTime());
 
 console.log(pgConn.find(pgConn.tables.ORGANIZATION, chatRoom));
 
-
-
 app.get('/organization/:obj', function (req, res) {
-	res = pgConn.find(pgConn.tables.ORGANIZATION, obj);
+	res.json(pgConn.find(pgConn.tables.ORGANIZATION, req.params.obj));
 });
 */
 
