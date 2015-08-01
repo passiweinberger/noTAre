@@ -11,21 +11,19 @@ var db, remoteCouch;
 
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
-// var remoteCouch = cloudant_url + roomID;
+// var remoteCouch = cloudant_url + sessionID;
 
 var syncDom = document.getElementById('sync-wrapper');
-//var newChatName = document.getElementById('chat-name');
-//var newChatMessage = document.getElementById('chat-message');
-//var addMessageButton = document.getElementById('new-message-button'); 
 
 function makeCouchDB(lectureID) {
-  db = new PouchDB(lectureID);
-  remoteCouch = cloudant_url + lectureID + '';
+  db = new PouchDB('' + lectureID);
+  remoteCouch = cloudant_url + lectureID;
   db.info(function(err, info) {
       ///*
       db.changes({
           since: info.update_seq,
           continuous: true,
+          live: true,
           onChange: readMessages
       });
       //*/
@@ -47,7 +45,7 @@ function sync() {
 
 function exportToCsv(filename, rows) {
         // var msgObj = 'At' + nowTime + ' by ' + $("#name") + ': ' + msg;
-        var processRow = function (row) {
+        var processRow = function(row) {
             var finalVal = '';
             for (var j = 0; j < row.length; j++) {
                 var innerValue = row[j] === null ? '' : row[j].toString();
@@ -153,10 +151,12 @@ if (!('webkitSpeechRecognition' in window)) {
       return;
     }
     final_transcript = '';
+    // TODO change according to country
     recognition.lang = "en-GB"
     recognition.start();
     $("#start_button").prop("value", "Recording ... Click to stop.");
-    $("#msg").val();
+    // $("#msg").val(final_transcript);
+    $("#msg").val(final_transcript);
   }
 //end of WebSpeech
 

@@ -8,16 +8,19 @@
   <link rel="stylesheet" href="css/app.css">
   <link rel="stylesheet" href="css/sync.css">
   <script src="js/pouchdb-3.6.0.min.js"></script>
+  <script src="components/jquery/dist/jquery.js"></script>
+  <script src="components/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="/socket.io/socket.io.js"></script>  
+
 </head>
 <body>
   <div class="main col-md-6 col-md-offset-3">
     <div class="alert alert-danger" id="errors"></div>
     <div id="login-screen">
       <p class="lead">Your collaborative and smart notepad for lectures and more!</p>
-      <p>Please enter a username below and click 'Join' or hit the 'Enter' key.</p>
         <form class="form-inline" id="nameForm">
           <div class="form-group">
-            <input type="text" class="form-control input-lg" placeholder="Your name" id="name">
+            <input type="text" class="form-control input-lg" placeholder="Select a username" id="name">
           </div>
           <input type="submit" name="join" id="join" value="Join" class="btn btn-primary btn-lg">
         </form>
@@ -81,10 +84,8 @@
     </div>
   </div>
   <!-- Modal end -->
-
-  <script src="components/jquery/dist/jquery.js"></script>
-  <script src="components/bootstrap/dist/js/bootstrap.js"></script>
-  <script src="/socket.io/socket.io.js"></script>  
+  
   <script src="js/client.js"></script>
+
 </body>
 </html>
