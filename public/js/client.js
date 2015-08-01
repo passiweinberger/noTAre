@@ -448,9 +448,9 @@ $(document).ready(function () {
 		}
 	});
 
-	$("#showCreateRoom").click(function () {
-		$("#createRoomForm").toggle();
-	});
+	//$("#showCreateRoom").click(function () {
+	//	$("#createRoomForm").toggle();
+	//});
 
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
