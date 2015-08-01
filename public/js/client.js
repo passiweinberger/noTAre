@@ -194,7 +194,7 @@ function translateMsgs(messages, language) {
 	});
 }
 
-
+//START of WebSpeech
 if (!('webkitSpeechRecognition' in window)) {
 	console.log("webkitSpeechRecognition is not available");
 } else {
@@ -241,7 +241,8 @@ function startButton(event) {
 		// $("#msg").val(final_transcript);
 		$("#msg").val(final_transcript);
 	}
-	//end of WebSpeech
+
+//END of WebSpeech
 
 /*
 Functions
@@ -316,7 +317,7 @@ $(document).ready(function () {
 	var socket = io(); // io.connect("{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); // process.env.CF_INSTANCE_ADDR // "75.126.81.66:3000" or for local runs: 127.0.0.1:3000
 	roomName = getUrlParameter("roomID");
 
-	// Test ob RoomID schon gesetzt ist?
+	// Test if RoomID is set?
 	if (roomName != undefined) {
 		$("body").children().hide();
 		$("#chatPage").show();
@@ -348,7 +349,7 @@ $(document).ready(function () {
 		$("#join").attr('disabled', 'disabled');
 	}
 
-	//enter screen
+	// Enter screen
 	$("#usernameForm").submit(function () {
 		MyName = $("#username").val();
 		var device = "desktop";
@@ -378,7 +379,7 @@ $(document).ready(function () {
 		}
 	});
 
-	//main chat screen
+	// Main chat screen
 	$("#chatForm").submit(function () {
 
 		var msg = $("#msg").val();
@@ -403,7 +404,7 @@ $(document).ready(function () {
 
 	});
 
-	//'is typing' message
+	// 'is typing' message
 	var typing = false;
 	var timeout = undefined;
 
@@ -462,6 +463,7 @@ $(document).ready(function () {
 			}
 		});
 	});
+
 	/*
 	$("#createRoomButton").on('click', function () {
 		var roomName = "abfddf_test1"; //$("#createRoomName").val(); 
@@ -476,22 +478,23 @@ $(document).ready(function () {
 		$("#chatPage").show();
 
 	});
-  */
+   */
 
-
-	/*$("#rooms").on('click', '.joinRoomBtn', function () {
+	/*
+	$("#rooms").on('click', '.joinRoomBtn', function () {
 		var roomName = $(this).siblings("span").text();
 		var roomID = $(this).attr("id");
 		socket.emit("joinRoom", roomID);
-	});*/
+	});
+	*/
 
 	/*
-		$("#rooms").on('click', '.removeRoomBtn', function () {
-			var roomName = $(this).siblings("span").text();
-			var roomID = $(this).attr("id");
-			socket.emit("removeRoom", roomID);
-			$("#createRoom").show();
-		});
+	$("#rooms").on('click', '.removeRoomBtn', function () {
+		var roomName = $(this).siblings("span").text();
+		var roomID = $(this).attr("id");
+		socket.emit("removeRoom", roomID);
+		$("#createRoom").show();
+	});
 	*/
 
 	$("#leave").click(function () {
@@ -505,22 +508,13 @@ $(document).ready(function () {
 		downloadMessages(roomName);
 	});
 
-	//  TRANSLATIONS: TODO
-
+// TRANSLATIONS: TODO
 	$("#translate_en").click(function () {
 		db.allDocs({
 			include_docs: true,
 			descending: true
 		}, function (err, doc) {
 			if (!err) {
-				/*
-				var message = {
-					_id: new Date().toISOString(), //required
-					name: $("#username"),
-					time: nowTime,
-					message: msg
-				};
-				*/
 				translateMsgs(messages, 'en');
 			} else {
 				console.log(err);
@@ -534,14 +528,6 @@ $(document).ready(function () {
 			descending: true
 		}, function (err, doc) {
 			if (!err) {
-				/*
-				var message = {
-					_id: new Date().toISOString(), //required
-					name: $("#username"),
-					time: nowTime,
-					message: msg
-				};
-				*/
 				translateMsgs(messages, 'es');
 			} else {
 				console.log(err);
@@ -555,14 +541,6 @@ $(document).ready(function () {
 			descending: true
 		}, function (err, doc) {
 			if (!err) {
-				/*
-				var message = {
-					_id: new Date().toISOString(), //required
-					name: $("#username"),
-					time: nowTime,
-					message: msg
-				};
-				*/
 				translateMsgs(messages, 'fr');
 			} else {
 				console.log(err);
@@ -576,14 +554,6 @@ $(document).ready(function () {
 			descending: true
 		}, function (err, doc) {
 			if (!err) {
-				/*
-				var message = {
-					_id: new Date().toISOString(), //required
-					name: $("#username"),
-					time: nowTime,
-					message: msg
-				};
-				*/
 				translateMsgs(messages, 'de');
 			} else {
 				console.log(err);
@@ -591,15 +561,16 @@ $(document).ready(function () {
 		});
 	});
 
-	// TRANSLATE END
+// TRANSLATIONS END
 
 	$("#people").on('click', '.whisper', function () {
 		var name = $(this).siblings("span").text();
 		$("#msg").val("w:" + name + ":");
 		$("#msg").focus();
 	});
+	
 	/*
-	  $("#whisper").change(function() {
+	$("#whisper").change(function() {
 	    var peopleOnline = [];
 	    if ($("#whisper").prop('checked')) {
 	      console.log("checked, going to get the peeps");
@@ -647,7 +618,7 @@ $(document).ready(function () {
 	  // });
 	*/
 
-	//socket-y stuff
+	// socket-y stuff
 	socket.on("exists", function (data) {
 		$("#errors").empty();
 		$("#errors").show();
@@ -658,7 +629,7 @@ $(document).ready(function () {
 
 	socket.on("joined", function () {
 		$("#errors").hide();
-		if (navigator.geolocation) { //get lat lon of user
+		if (navigator.geolocation) { // get Geolocation of user
 			navigator.geolocation.getCurrentPosition(positionSuccess, positionError, {
 				enableHighAccuracy: true
 			});
@@ -674,7 +645,7 @@ $(document).ready(function () {
 		function positionSuccess(position) {
 			var lat = position.coords.latitude;
 			var lon = position.coords.longitude;
-			//consult the yahoo service
+			// consult the yahoo service for country
 			$.ajax({
 				type: "GET",
 				url: "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20geo.placefinder%20where%20text%3D%22" + lat + "%2C" + lon + "%22%20and%20gflags%3D%22R%22&format=json",
@@ -731,9 +702,8 @@ $(document).ready(function () {
 	});
 
 	socket.on("chat", function (msTime, person, msg) {
-		// up to couchDB
 		$("#msgs").append("<li><strong><span class='text-success'>" + timeFormat(msTime) + person.name + "</span></strong>: " + msg.message + "</li>");
-		//clear typing field
+		// clear typing field
 		$("#" + person.name + "").remove();
 		clearTimeout(timeout);
 		timeout = setTimeout(timeoutFunction, 0);
@@ -787,7 +757,7 @@ $(document).ready(function () {
 	}];
 
 
-	var chatRoom = new Chat("", "", "", "");
+	//var chatRoom = new Chat("", "", "", "");
 
 	$(".createHierarchy").click(function () {
 
@@ -832,6 +802,7 @@ $(document).ready(function () {
 		}
 	});
 
+	/*
 	$(".middleInput").on('keyup', function (e) {
 
 		delay(function () {
@@ -841,7 +812,8 @@ $(document).ready(function () {
 			console.log(chatRoom);
 		}, 500)
 
-	}).timeout({});
+	});
+	*/
 
 	// PICKADATE
 	$("#dob").pickadate({
@@ -849,5 +821,4 @@ $(document).ready(function () {
 		formatSubmit: 'mm/dd/yyyy',
 		hiddenName: true
 	});
-
 });

@@ -18,4 +18,4 @@ Chat.prototype.setStartTime = function(start_time) {
   this.org = start_time;
 };
 
-//module.exports = Chat;
+module.exports = Chat;
