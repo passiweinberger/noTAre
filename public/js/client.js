@@ -171,7 +171,7 @@ function readMessages() {
 function redrawChat2(messages) {
 	$("#msgs").val('');
 	messages.forEach(function (msg) {
-		$("#msgs").append("<li><span class='text-warning'>" + msg.doc.message + "</span></li>");
+		$("#msgs").append("<li><span class='text-warning'>" + handlelink(msg.doc.message) + "</span></li>"); // msg.doc.message
 	});
 }
 
@@ -184,7 +184,7 @@ function redrawChat(messages) {
 		var pMessage = document.createElement("p");
 
 		pName.textContent = message.doc.name;
-		pMessage.textContent = message.doc.message;
+		pMessage.textContent = handlelink(message.doc.message); //message.doc.message;
 		pName.className = "text-danger";
 
 		li.appendChild(pName);
@@ -205,7 +205,8 @@ function translateMsgs(messages, language) {
 		var pMessage = document.createElement("p");
 
 		pName.textContent = message.doc.name;
-		pMessage.textContent = translated_msg = translate(language, message.doc.message);
+		translated_msg = translate(language, message.doc.message);
+		pMessage.textContent = handlelink(message.doc.message); //translated_msg
 		pName.className = "text-danger";
 
 		li.appendChild(pName);
@@ -516,6 +517,7 @@ $(document).ready(function () {
 	});
 
 	//  TRANSLATIONS: TODO
+
 	$("#translate_en").click(function () {
 		db.allDocs({
 			include_docs: true,
@@ -530,7 +532,6 @@ $(document).ready(function () {
 					message: msg
 				};
 				*/
-				//exportToCsv(filename, doc.rows);
 				translateMsgs(messages, 'en');
 			} else {
 				console.log(err);
@@ -552,7 +553,6 @@ $(document).ready(function () {
 					message: msg
 				};
 				*/
-				//exportToCsv(filename, doc.rows);
 				translateMsgs(messages, 'es');
 			} else {
 				console.log(err);
@@ -574,7 +574,6 @@ $(document).ready(function () {
 					message: msg
 				};
 				*/
-				//exportToCsv(filename, doc.rows);
 				translateMsgs(messages, 'fr');
 			} else {
 				console.log(err);
@@ -596,7 +595,6 @@ $(document).ready(function () {
 					message: msg
 				};
 				*/
-				//exportToCsv(filename, doc.rows);
 				translateMsgs(messages, 'de');
 			} else {
 				console.log(err);
