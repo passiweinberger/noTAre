@@ -1,4 +1,4 @@
-#login-screen, #main-chat-screen {
+/*#login-screen, #main-chat-screen {
   padding-top: 10px;
 }
 .main {
@@ -16,4 +16,9 @@
 }
 .interim {
   font-color: #f00;
+}
+*/
+
+#chatpage {
+	display: none;
 }
