@@ -446,12 +446,16 @@ $(document).ready(function () {
 
 	$("#createRoomButton").on('click', function () {
 		var roomName = "abcdef"; //TODO:Random
+
+		$("body").children().hide();
+		$("#sync-wrapper").show();
+
 		joining = false;
 		makeCouchDB(roomName);
 		socket.emit("createRoom", roomName);
 
-		$("body").children().hide();
 		$("#chatPage").show();
+
 	});
 
 
