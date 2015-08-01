@@ -392,32 +392,27 @@ $(document).ready(function () {
 
 	//main chat screen
 	$("#chatForm").submit(function () {
-		if (myRoomID !== null) {
-			var msg = $("#msg").val();
-			if (msg !== "") {
-				var nowTime = new Date().getTime();
-				var message = {
-					_id: new Date().toISOString(), //required
-					name: $("#name"),
-					time: nowTime,
-					message: msg
-				};
-				socket.emit("send", nowTime, message);
-				db.put(message, function callback(err, result) {
-					if (!err) {
-						console.log('Successfully uploaded to couchDB!');
-					} else {
-						console.log(err);
-					}
-				});
-				$("#msg").val("");
-			}
-		} else {
-			$("#errors").empty();
-			$("#errors").show();
-			$("#errors").append("Du musst in einer Vorlesung sein um zu chatten!");
-			$("#createRoom").show();
+
+		var msg = $("#msg").val();
+		if (msg !== "") {
+			var nowTime = new Date().getTime();
+			var message = {
+				_id: new Date().toISOString(), //required
+				name: 'user',
+				time: nowTime,
+				message: msg
+			};
+			socket.emit("send", nowTime, message);
+			db.put(message, function callback(err, result) {
+				if (!err) {
+					console.log('Successfully uploaded to couchDB!');
+				} else {
+					console.log(err);
+				}
+			});
+			$("#msg").val("");
 		}
+
 	});
 
 	//'is typing' message
@@ -833,10 +828,8 @@ $(document).ready(function () {
 
 		var str = $(this).val().toLowerCase();
 		//chatRoom.setOrg($(this).val());
-		<< << << < HEAD
-		console.log(str); === === =
-		//console.log(chatRoom);
-		>>> >>> > 8246 bb76249edcebfbce8c6d9d3627e95813855b
+		console.log(str);
+
 
 		$("#dropDownContainer ul").html("");
 		elems.forEach(function (elem) {
