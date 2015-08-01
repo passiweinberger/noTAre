@@ -119,10 +119,7 @@
 					</form>
 
 					<button id="createRoomButton">(Create Room)</button>
-					<div id="sync-wrapper">
-						<div id="sync-success" class="alert alert-success">Status: sync working. Be patient.</div>
-						<div id="sync-error" class="alert alert-danger">Status: sync failed. Try refreshing the page.</div>
-					</div>
+
 				</div>
 			</div>
 		</div>
@@ -194,6 +191,10 @@
 		</section>
 	</aside>
 
+	<div id="sync-wrapper">
+		<div id="sync-success" class="alert alert-success">Status: sync working. Be patient.</div>
+		<div id="sync-error" class="alert alert-danger">Status: sync failed. Try refreshing the page.</div>
+	</div>
 
 	<div id="chatPage">
 		<nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
@@ -216,7 +217,7 @@
 				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
 					<ul class="nav navbar-nav navbar-right">
 						<li>
-							<a class="page-scroll" href="#about"><i class="fa fa-download"></i></a>
+							<a class="page-scroll" id="downloadButton"><i class="fa fa-download"></i></a>
 							<li>
 								<a class="page-scroll" href="#about">DE</a>
 							</li>

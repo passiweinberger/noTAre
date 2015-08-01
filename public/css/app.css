@@ -1,5 +1,12 @@
-#chatPage {
+#chatPage,
+#sync-wrapper {
 	display: none;
+}
+
+#sync-wrapper {
+	margin-left: 20%;
+	margin-right: 20%;
+	margin-top: 10%;
 }
 
 #login-screen,
