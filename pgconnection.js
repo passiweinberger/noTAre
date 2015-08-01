@@ -13,9 +13,9 @@ var PgConnection = (function () {
     var tables = {
         organization : 'id serial NOT NULL PRIMARY KEY, name character varying UNIQUE NOT NULL',
         course       : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), name character varying NOT NULL, UNIQUE (org_id, name)',
-        tutor        : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), name character varying NOT NULL, UNIQUE (org_id, course_id, name)',
-        chat         : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), tutor_id int NOT NULL REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (org_id, course_id, tutor_id, start_time)',
-        logs         : 'id serial NOT NULL PRIMARY KEY, org_id int NOT NULL REFERENCES organization (id), course_id int NOT NULL REFERENCES course (id), tutor_id int NOT NULL REFERENCES tutor (id), chat_start_time timestamp with time zone NOT NULL REFERENCES chat (start_time), language CHARACTER(3) NOT NULL, data BYTEA NOT NULL, UNIQUE (org_id, course_id, tutor_id, chat_start_time, language, data)'
+        tutor        : 'id serial NOT NULL PRIMARY KEY, course_id int NOT NULL REFERENCES course (id), name character varying NOT NULL, UNIQUE (course_id, name)',
+        chat         : 'id serial NOT NULL PRIMARY KEY, tutor_id int NOT NULL REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (tutor_id, start_time)',
+        logs         : 'id serial NOT NULL PRIMARY KEY, chat_id int NOT NULL REFERENCES chat (id), language CHARACTER(3) NOT NULL, data BYTEA NOT NULL, UNIQUE (chat_id, language, data)'
     }
     if (process.env.VCAP_SERVICES) {
       var env = JSON.parse(process.env.VCAP_SERVICES);
@@ -51,13 +51,22 @@ var PgConnection = (function () {
             var qry;
             switch (table) {
                 case 1: // course
-                    qry = "SELECT * FROM public.course WHERE NAME LIKE '%"+obj.course+"%';"; 
+                    qry = "SELECT * FROM public.course WHERE NAME LIKE '%"+obj.course+"%' AND org_id = \
+                    (SELECT id FROM public.organization WHERE name = '"+obj.org+"');"; 
                     break;
                 case 2: // tutor
-                    qry = "SELECT * FROM public.tutor WHERE NAME LIKE '%"+obj.tutor+"%';"; 
+                    qry = "SELECT * FROM public.tutor WHERE NAME LIKE '%"+obj.tutor+"%' AND course_id = \
+                    (SELECT id FROM public.course WHERE name = '"+obj.course+"' AND org_id = \
+                        (SELECT id FROM public.organization WHERE name = '"+obj.org+"')\
+                    );"; 
                     break;
                 case 3:  // chat -- select stuff from *today*
-                    qry = "SELECT EXTRACT(EPOCH FROM start_time AT TIME ZONE 'UTC')::int AS start_time FROM chat where start_time > current_date;"; 
+                    qry = "SELECT EXTRACT(EPOCH FROM start_time AT TIME ZONE 'UTC')*1000::int AS start_time FROM chat where start_time > current_date AND tutor_id = \
+                    (SELECT id FROM public.tutor WHERE name = '"+obj.tutor+"' AND course_id = \
+                        (SELECT id FROM public.course WHERE name = '"+obj.course+"' AND org_id = \
+                            (SELECT id FROM public.organization WHERE name = '"+obj.org+"')\
+                        )\
+                    );"; 
                     break;
                 default: // org
                     qry = "SELECT * FROM public.organization WHERE NAME LIKE '%"+obj.org+"%';"; 
@@ -71,20 +80,23 @@ var PgConnection = (function () {
             switch (table) {
                 case 1:
                     qry = "INSERT INTO public.course (org_id, name) VALUES (\
-                        (SELECT id FROM public.organization WHERE NAME LIKE '%"+obj.org+"%'), \
+                        (SELECT id FROM public.organization WHERE name = '"+obj.org+"'), \
                         '"+obj.course+"');"
                     break;
                 case 2:
-                    qry = "INSERT INTO public.tutor (org_id, course_id, name) VALUES (\
-                        (SELECT id FROM public.organization WHERE NAME LIKE '%"+obj.org+"%'), \
-                        (SELECT id FROM public.course WHERE NAME LIKE '%"+obj.course+"%'), \
+                    qry = "INSERT INTO public.tutor (course_id, name) VALUES (\
+                            (SELECT id FROM public.course WHERE name = '"+obj.course+"' AND org_id = \
+                                (SELECT id FROM public.organization WHERE name = '"+obj.org+"')\
+                            ), \
                         '"+obj.tutor+"');"
                     break;
                 case 3:
-                    qry = "INSERT INTO public.chat (org_id, course_id, tutor_id, start_time) VALUES (\
-                        (SELECT id FROM public.organization WHERE NAME LIKE '%"+obj.org+"%'), \
-                        (SELECT id FROM public.course WHERE NAME LIKE '%"+obj.course+"%'), \
-                        (SELECT id FROM public.tutor WHERE NAME LIKE '%"+obj.tutor+"%'), \
+                    qry = "INSERT INTO public.chat (tutor_id, start_time) VALUES (\
+                        (SELECT id FROM public.tutor WHERE name = '"+obj.tutor+"' AND course_id = \
+                            (SELECT id FROM public.course WHERE name = '"+obj.course+"' AND org_id = \
+                                (SELECT id FROM public.organization WHERE name = '"+obj.org+"')\
+                            ), \
+                        ), \
                         to_timestamp("+obj.start_time+"/1000.));"
                     break;
                 default:
@@ -94,14 +106,32 @@ var PgConnection = (function () {
         }
 
         this.saveLog = function(obj, language, logObject) {
-
+            _doQuery("INSERT INTO logs (chat_id, language, data) VALUES ("+language+", "+logObject+")");
         }
 
         this.getLog = function(obj, language, callback) {
-            _doQuery("SELECT EXTRACT(EPOCH FROM start_time AT TIME ZONE 'UTC')::int AS start_time FROM chat where start_time > current_date;", callback);
+            _doQuery("SELECT * FROM logs WHERE language = '"+language+"' AND chat_id = \
+                (SELECT id FROM chat WHERE date_trunc('hour', start_time) = date_trunc('hour', to_timestamp("+obj.start_time+"/1000.)) AND tutor_id = \
+                    (SELECT id FROM public.tutor WHERE name = '"+obj.tutor+"' AND course_id = \
+                        (SELECT id FROM public.course WHERE name = '"+obj.course+"' AND org_id = \
+                            (SELECT id FROM public.organization WHERE name = '"+obj.org+"')\
+                        )\
+                    )\
+                );", "logs", obj, callback);
         }
     }
 
+
+
+/*
+SELECT * FROM logs WHERE language = '000' AND chat_id = 
+                (SELECT id FROM chat WHERE date_trunc('hour', start_time) = date_trunc('hour', to_timestamp(1438427188300/1000.)) AND tutor_id = 
+                    (SELECT id FROM public.tutor WHERE name = 'Peter' AND course_id = 
+                        (SELECT id FROM public.course WHERE name = 'Hackathon' AND org_id = 
+                            (SELECT id FROM public.organization WHERE name = 'Uni Mainz')
+                        )
+                    )
+                );*/
 
 // -------------- helper functions ----------------
 
@@ -132,7 +162,9 @@ var PgConnection = (function () {
                     case 3:  // chat -- select stuff from *today*
                         ret.push(dbObject.rows[i]['start_time']); 
                         break;
-                    default: // nothing
+                    default: // logs
+                        ret.push(dbObject.rows[i]['data']); 
+                        break;
                 }
             }
             //console.log("$ PARSED :")
@@ -162,7 +194,7 @@ var conn;
 
 var server = http.createServer(function(req, res) {
     var Chat = module.require("./Chat.js")
-    var chatRoom = new Chat("Mainz", "Hac", "P", ""+new Date().getTime());
+    var chatRoom = new Chat("Mai", "Hac", "P", ""+new Date().getTime());
     console.log(chatRoom);
     // conn.create(conn.tables.ORGANIZATION, chatRoom);
     // conn.create(conn.tables.COURSE, chatRoom);
@@ -171,10 +203,14 @@ var server = http.createServer(function(req, res) {
 
 
     res.end(conn.find(conn.tables.ORGANIZATION, chatRoom));
+    chatRoom.setOrg('Uni Mainz');
     res.end(conn.find(conn.tables.COURSE, chatRoom));
+    chatRoom.setCourse('Hackathon');
     res.end(conn.find(conn.tables.TUTOR, chatRoom));
+    chatRoom.setTutor('Peter');
     res.end(conn.find(conn.tables.CHAT, chatRoom));
     console.log("=====================================");
+    conn.getLog(chatRoom, '000')
     res.end(conn.find(conn.tables.ORGANIZATION, new Chat("b")));
 });
 
