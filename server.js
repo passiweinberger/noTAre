@@ -101,7 +101,11 @@ io.sockets.on("connection", function (socket) {
 		if (exists) {//provide unique username:
 			var randomNumber=Math.floor(Math.random()*1001)
 			do {
-				proposedName = name+randomNumber;
+				if (randomNumber%2===0) {
+					proposedName = name + 'BOSS';
+				} else {
+					proposedName = name+randomNumber;
+				}
 				_.find(people, function(key,value) {
 					if (key.name.toLowerCase() === proposedName.toLowerCase())
 						return exists = true;
@@ -142,8 +146,8 @@ io.sockets.on("connection", function (socket) {
 
 		//process.exit(1);
 		var re = /^[w]:.*:/;
-		var whisper = re.test(msg);
-		var whisperStr = msg.split(":");
+		var whisper = re.test(msg.message);
+		var whisperStr = msg.message.split(":");
 		var found = false;
 		if (whisper) {
 			var whisperTo = whisperStr[1];
@@ -170,11 +174,11 @@ io.sockets.on("connection", function (socket) {
 			}
 		} else {
 			if (io.sockets.manager.roomClients[socket.id]['/'+socket.room] !== undefined ) {
-				io.sockets.in(socket.room).emit("chat", msTime, people[socket.id], msg);
-				socket.emit("isTyping", false);
-				chatHistory[socket.room].push(people[socket.id].name + ": " + msg);
+					io.sockets.in(socket.room).emit("chat", msTime, people[socket.id], msg);
+					socket.emit("isTyping", false);
+					chatHistory[socket.room].push(people[socket.id].name + ": " + msg.message);
 		    	} else {
-				socket.emit("update", "Please connect to a room.");
+					socket.emit("update", "Please connect to a room.");
 		    	}
 		}
 	});

@@ -44,14 +44,20 @@ function sync() {
 }
 
 function exportToCsv(filename, rows) {
-        // var msgObj = 'At' + nowTime + ' by ' + $("#name") + ': ' + msg;
+        /*
+        var message = {
+            _id: new Date().toISOString(), //required
+            name: newChatName.value,
+            message: newChatMessage.value
+        };
+        */
         var processRow = function(row) {
             var finalVal = '';
             for (var j = 0; j < row.length; j++) {
                 var innerValue = row[j] === null ? '' : row[j].toString();
-                //if (row[j] instanceof Date) {
-                //    innerValue = row[j].toLocaleString();
-                //};
+                if (row[j] instanceof Date) {
+                    innerValue = row[j].toLocaleString();
+                };
                 var result = innerValue.replace(/"/g, '""');
                 if (result.search(/("|,|\n)/g) >= 0)
                     result = '"' + result + '"';
@@ -90,7 +96,13 @@ function downloadMessages(roomName) {
     if (!err) {
       // write messages to file: TODO
       var filename = '' + roomName + '.csv';
-      // var msgObj = 'At' + nowTime + ' by ' + $("#name") + ': ' + msg;
+      /*
+        var message = {
+            _id: new Date().toISOString(), //required
+            name: newChatName.value,
+            message: newChatMessage.value
+        };
+      */
       exportToCsv(filename, doc.rows);
     } else {
       console.log(err);
@@ -105,13 +117,31 @@ function readMessages() {
 }
 
 
+function redrawChat2(messages) {
+    $("#msgs").val('');
+    messages.forEach(function(msg) {
+        $("#msgs").append("<li><span class='text-warning'>" + msg.doc.message + "</span></li>");
+    });
+}
+
 function redrawChat(messages) {
     var ul = document.getElementById('msgs');
     ul.innerHTML = '';
-    messages.forEach(function(msg) {
-        $("#msgs").append("<li><span class='text-warning'>" + msg + "</span></li>");
+    messages.forEach(function(message) {
+        var li=document.createElement("li");
+        var pName = document.createElement("p");
+        var pMessage = document.createElement("p");
+
+        pName.textContent = message.doc.name;
+        pMessage.textContent = message.doc.content;
+        pName.className = "text-danger";
+
+        li.appendChild(pName);
+        li.appendChild(pMessage);
+        li.className = "list-group-item";
+        ul.appendChild(li);
     });
-}
+
 
 
 if (!('webkitSpeechRecognition' in window)) {
@@ -227,6 +257,7 @@ function check(roomName) {
 
 $(document).ready(function() {
   // setup "global" variables first
+  // TODO PORT??
   var socket =  io(); // io.connect("{0}:{1}".format(process.env.VCAP_APP_HOST, process.env.PORT)); // process.env.CF_INSTANCE_ADDR // "75.126.81.66:3000" or for local runs: 127.0.0.1:3000
   var myRoomID = null;
 
@@ -285,13 +316,16 @@ $(document).ready(function() {
       var msg = $("#msg").val();
       if (msg !== "") {
         var nowTime = new Date().getTime();
-        socket.emit("send", nowTime, msg);
-        // insert to couchDB: TODO
-        var msgObj = 'At' + nowTime + ' by ' + $("#name") + ': ' + msg;
-            db.put(msgObj, function callback(err, result) {
+        var message = {
+            _id: new Date().toISOString(), //required
+            name: $("#name"),
+            time: nowTime,
+            message: msg
+        };
+        socket.emit("send", nowTime, message);
+        db.put(message, function callback(err, result) {
             if (!err) {
               console.log('Successfully uploaded to couchDB!');
-              //$.JSONView(result, $("#output-resp"));
             } else {
               console.log(err);
             }
@@ -482,7 +516,7 @@ socket.on("history", function(data) {
   if (data.length !== 0) {
     $("#msgs").append("<li><strong><span class='text-warning'>Last messages:</li>");
     $.each(data, function(data, msg) {
-      $("#msgs").append("<li><span class='text-warning'>" + msg + "</span></li>");
+      $("#msgs").append("<li><span class='text-warning'>" + msg.time + ': ' + msg.message + "</span></li>");
     });
   } else {
     $("#msgs").append("<li><strong><span class='text-warning'>No past messages in this room.</li>");
@@ -490,13 +524,13 @@ socket.on("history", function(data) {
 });
 
   socket.on("update", function(msg) {
-    $("#msgs").append("<li>" + msg + "</li>");
+    $("#msgs").append("<li>" + msg.time + ': ' + msg.message + "</li>");
   });
 
   socket.on("update-people", function(data){
     //var peopleOnline = [];
     $("#people").empty();
-    $('#people').append("<li class=\"list-group-item active\">People online <span class=\"badge\">"+data.count+"</span></li>");
+    $('#people').append("<li class=\"list-group-item active\">People online <span class=\"badge\">" + data.count + "</span></li>");
     $.each(data.people, function(a, obj) {
       if (!("country" in obj)) {
         html = "";
@@ -522,7 +556,7 @@ socket.on("history", function(data) {
 
   socket.on("chat", function(msTime, person, msg) {
     // up to couchDB
-    $("#msgs").append("<li><strong><span class='text-success'>" + timeFormat(msTime) + person.name + "</span></strong>: " + msg + "</li>");
+    $("#msgs").append("<li><strong><span class='text-success'>" + timeFormat(msTime) + person.name + "</span></strong>: " + msg.message + "</li>");
     //clear typing field
      $("#"+person.name+"").remove();
      clearTimeout(timeout);
@@ -535,7 +569,7 @@ socket.on("history", function(data) {
     } else {
       s = "whispers"
     }
-    $("#msgs").append("<li><strong><span class='text-muted'>" + timeFormat(msTime) + person.name + "</span></strong> "+s+": " + msg + "</li>");
+    $("#msgs").append("<li><strong><span class='text-muted'>" + timeFormat(msTime) + person.name + "</span></strong> "+s+": " + msg.message + "</li>");
   });
 
   socket.on("roomList", function(data) {
