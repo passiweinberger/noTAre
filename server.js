@@ -187,7 +187,7 @@ io.sockets.on("connection", function (socket) {
 		pgConn.find(
 			pgConn.tables.ORGANIZATION, 
 			obj,
-			socket.emit("foundOrganizations", obj);
+			socket.emit
 		);
 	});
 	socket.on("selectOrganization", function (obj) {

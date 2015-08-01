@@ -20,10 +20,10 @@ var PgConnection = (function () {
     if (process.env.VCAP_SERVICES) {
       var env = JSON.parse(process.env.VCAP_SERVICES);
       var credentials = env['postgresql-9.1'][0]['credentials'];
-      console.log("using ENV VCAP_SERVICES")
+      console.log("PGCONN: using ENV VCAP_SERVICES")
     } else {
       var pg_pass = process.env.PG_PASSWORD // SET ENV VARIABLE: PG_PASWORD
-      console.log("using ENV PG_PASSWORD")
+      console.log("PGCONN: using ENV PG_PASSWORD")
       var credentials = {"uri":"postgre://postgres:"+pg_pass+"@localhost:5432/chat"}
     }
 
@@ -137,11 +137,11 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
 
     var _doQuery = function _doQuery(qry, table, obj, callback) {
         pg.connect(credentials.uri, function(err, client, done) {
-            console.log(qry);
+            //console.log(qry);
             var query = client.query(qry, function(err, result) {
-                if (err) { console.log("Error running query: " + err); }
-                console.log(">" + qry + "\n>>");
-                console.log(result);
+                if (err) { console.log("PGCONN: Error running query: " + err); }
+                //console.log(">" + qry + "\n>>");
+                //console.log(result);
                 _parse(table, result, obj, callback);
                 done();
             });
@@ -149,7 +149,7 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
     }
 
     var _parse = function _parse(table, dbObject, obj, callback) {
-        console.log("$ PARSE CALLED");
+        //console.log("$ PARSE CALLED");
         var ret  = [];
         var emitTo;
         try {
@@ -176,7 +176,7 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
                     obj.setTutor(ret);
                     break;
                 case 3:  // chat -- select stuff from *today*
-                    emitTo = "foundStartTimes";
+                    emitTo = "foundChats";
                     for (var i = 0, l = dbObject.rows.length; i < l; i++) {
                         ret.push(dbObject.rows[i]['start_time']); 
                     }
@@ -188,8 +188,10 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
                     }
                     break;
             }
-            //console.log("$ PARSED :")
-            console.log(ret);
+            if (typeof ret !== 'undefined' && ret.length > 0) {
+                console.log("PGCONN: PARSED")
+                console.log(ret);
+            }
             //console.log("callback = ")
             //console.log(callback)
             //console.log("$ callback != 'undefined' && callback != null (" + (callback != 'undefined' && callback != null) + ") - " + (callback != 'undefined' && callback != null ? "calling with result" : "doing nothing"));
@@ -207,7 +209,7 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
 
 module.exports = PgConnection;
 
-
+/*
 
 
 
@@ -244,3 +246,4 @@ server.on('listening',function(){
 });
 
 server.listen(8080);
+*/
