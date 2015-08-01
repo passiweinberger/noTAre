@@ -1,0 +1,35 @@
+Prio1
+Merging
+	- Funktionen in Chat einbinden
+		- Link Parser
+		- Translator
+	- Funktion um Chat zu verlassen
+
+Erstellen eines Raums
+	- PickDate / Time
+		- components/pcikadate/
+		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.5.3/themes/default.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.5.3/themes/default.date.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.5.3/themes/default.time.css">
+
+	- Hierarchie
+	- Nochmal design angucken/vorgehensweise	
+
+Prio2
+Sharing des Raumes
+	- Einerseits Link
+	- (FB/Twitter/Google+) Prio5
+
+Uploading von Dateien
+	- Sharing über Server
+
+Sort by Time / Sort By Upvotes
+	- (Kommentare)	
+	- Überlegen wie es geupdatet wird.
+
+Prio3: 
+Download des Chatverlaufs
+
+
+priorität 4: Vote-Funktion / Hintergrundbild / User-Farben
+

@@ -1,86 +1,311 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-  <title>noTAre</title>
-  <link rel="stylesheet" type="text/css" href="components/bootstrap/dist/css/bootstrap.css">
-  <link rel="stylesheet" href="components/font-awesome/css/font-awesome.css">
-  <link rel="stylesheet" href="css/flags.css">
-  <link rel="stylesheet" href="css/app.css">
-  <link rel="stylesheet" href="css/sync.css">
-  <script src="js/pouchdb-3.6.0.min.js"></script>
+	<title>noTAre</title>
+	<link rel="stylesheet" type="text/css" href="components/bootstrap/dist/css/bootstrap.css">
+	<link rel="stylesheet" href="components/font-awesome/css/font-awesome.css">
+	<!-- Custom Fonts -->
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Merriweather:400,300,300italic,400italic,700,700italic,900,900italic' rel='stylesheet' type='text/css'>
+	<link rel="stylesheet" href="font-awesome/css/font-awesome.min.css" type="text/css">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.5.3/themes/default.css">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.5.3/themes/default.date.css">
+	<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.5.3/themes/default.time.css">
+
+	<!-- Plugin CSS -->
+	<link rel="stylesheet" href="css/animate.min.css" type="text/css">
+
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="css/creative.css" type="text/css">
+
+	<link rel="stylesheet" href="css/flags.css">
+	<link rel="stylesheet" href="css/app.css">
+	<link rel="stylesheet" href="css/sync.css">
+
+	<script src="js/pouchdb-3.6.0.min.js"></script>
+	<script src="components/jquery/dist/jquery.js"></script>
+	<script src="components/bootstrap/dist/js/bootstrap.js"></script>
+	<script src="js/regex.js"></script>
+	<script src="js/getType.js"></script>
+	<script src="js/handlelink.js"></script>
+	<script src="js/translator.js"></script>
+	<script src="js/parser.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
 </head>
-<body>
-  <div class="main col-md-6 col-md-offset-3">
-    <div class="alert alert-danger" id="errors"></div>
-    <div id="login-screen">
-      <p class="lead">Your collaborative and smart notepad for lectures and more!</p>
-      <p>Please enter a username below and click 'Join' or hit the 'Enter' key.</p>
-        <form class="form-inline" id="nameForm">
-          <div class="form-group">
-            <input type="text" class="form-control input-lg" placeholder="Your name" id="name">
-          </div>
-          <input type="submit" name="join" id="join" value="Join" class="btn btn-primary btn-lg">
-        </form>
-      </div>
-    </div>
 
-    <div class="row" id="main-chat-screen">
-      <div class="col-md-3">
-        <ul id="rooms" class="list-group"></ul>
-        <ul id="people" class="list-group"></ul>
-      </div>
-      <div class="col-md-6">
-        <div id="conversation">
-          <ul id="msgs" class="list-unstyled"></ul>
-        </div>
-        <form id="chatForm" class="form-inline">
-          <div class="form-group">
-            <input type="text" class="form-control input-lg" placeholder="Your message" id="msg">
-          </div>
-          <input type="submit" name="send" id="send" value="Send" class="btn btn-success btn-lg">
-          <input type="button" name="start_button" id="start_button" value="Record" onclick="startButton(event)" class="btn btn-info btn-lg">
-          <div class="btn-group">
-            <button type="button" class="btn btn-lg btn-info dropdown-toggle" data-toggle="dropdown" >
-              Actions <span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="#" name="createRoom" data-toggle="modal" data-target="#roomModal">Create a new lecture session!</a></li>
-              <li><a href="#" name="leave" id="leave">Leave current session</a></li>
-              <!--<li><a href="#" name="disconnect" id="disconnect">Disconnect from chat</a></li>-->
-            </ul>
-          </div>
-        </form>
-      </div>
-       <div class="col-md-2">
-        <ul class="list-unstyled" id="updates"></ul>
-      </div>
-    </div>
-  </div>
 
-  <!-- Modal start -->
-  <div class="modal fade" id="roomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-          <h4 class="modal-title" id="createRoomLabel">Create room</h4>
-        </div>
-        <div class="modal-body">
-          You can create a lecture session here. Names have to be unique.
-          <form class="form-inline" id="createRoomForm"><input type="text" class="form-control input-lg"  placeholder="Room name" id="createRoomName"></form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Close</button>
-          <button data-dismiss="modal" id="createRoomBtn" class="btn btn-success btn-lg">Create session</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Modal end -->
+<body id="page-top">
+	<nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
+		<div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand page-scroll" href="#page-top">noTAre</a>
+			</div>
 
-  <script src="components/jquery/dist/jquery.js"></script>
-  <script src="components/bootstrap/dist/js/bootstrap.js"></script>
-  <script src="/socket.io/socket.io.js"></script>  
-  <script src="js/client.js"></script>
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+				<ul class="nav navbar-nav navbar-right">
+					<li>
+						<a class="page-scroll" href="#about">Erstellen</a>
+					</li>
+					<li>
+						<a class="page-scroll" href="#services">Mehrwert</a>
+					</li>
+					<li>
+						<a class="page-scroll" href="#contact">Kontakt</a>
+					</li>
+				</ul>
+			</div>
+			<!-- /.navbar-collapse -->
+		</div>
+		<!-- /.container-fluid -->
+	</nav>
+
+	<header>
+		<div class="header-content">
+			<div class="header-content-inner">
+				<h1>Genervt von monotonen Mitschriften deiner Vorlesungen?</h1>
+				<hr>
+				<p>Oder gar keine Lust mitzuschreiben? Behalte den Überblick über deine Vorlesungen - Zu jedem Zeitpunkt - Dann, wenn es drauf ankommt!</p>
+				<a href="#about" class="btn btn-primary btn-xl page-scroll">Mehr erfahren</a>
+			</div>
+		</div>
+	</header>
+
+	<section class="bg-primary" id="about">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-lg-offset-2 text-center">
+					<h2 class="section-heading">Wir haben die Lösung!</h2>
+					<!--...was du brauchst-->
+					<hr class="light">
+					<p class="text-faded">Mit noTAre bilden Studenten eine Einheit. Bekomme schnelle anonyme Hilfestellungen unabhänig von spachlichen Barrieren.</p>
+					<a href="#createRoom" class="btn btn-default btn-xl page-scroll">Erstellen</a>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="createRoom">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-lg-offset-2 text-center">
+					<h2 class="section-heading">Raum Erstellen</h2>
+					<div id="chosenHierarchy">
+						<ul class="list-group">
+						</ul>
+					</div>
+					<input class="middleInput">
+					<button class="btn btn success createHierarchy">Create</button>
+					<div id="dropDownContainer">
+						<ul class="list-group"></ul>
+					</div>
+
+					<form id="pickDateForm" method="post" class="form-horizontal">
+						<div class="form-group">
+							<label class="col-xs-3 control-label">Date of Lecture</label>
+							<div class="col-xs-5">
+								<input type="text" class="form-control" name="dob" id="dob">
+							</div>
+
+						</div>
+					</form>
+
+					<button id="createRoomButton">(Create Room)</button>
+					<div id="sync-wrapper">
+						<div id="sync-success" class="alert alert-success">Status: sync working. Be patient.</div>
+						<div id="sync-error" class="alert alert-danger">Status: sync failed. Try refreshing the page.</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id="services">
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-12 text-center">
+					<h2 class="section-heading">Lern-Booster</h2>
+					<!--Beste Unterstützung-->
+					<hr class="primary">
+				</div>
+			</div>
+		</div>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-3 col-md-6 text-center">
+					<div class="service-box">
+						<i class="fa fa-4x fa fa-graduation-cap wow bounceIn text-primary"></i>
+						<h3>Effizient studieren</h3>
+						<p class="text-muted"></p>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 text-center">
+					<div class="service-box">
+						<i class="fa fa-4x fa-newspaper-o wow bounceIn text-primary" data-wow-delay=".1s"></i>
+						<h3>Am Ball bleiben</h3>
+						<p class="text-muted">Auch im Krankheitsfall live am Unterricht teilnehmen & die gesammelten Mitschriften speichern</p>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 text-center">
+					<div class="service-box">
+						<i class="fa fa-4x fa-comment wow bounceIn text-primary" data-wow-delay=".2s"></i>
+						<h3>Kollaborativ</h3>
+						<p class="text-muted">Gemeinsam eine Vorlesung dokumentieren & zeitgleich anonym Fragen stellen</p>
+					</div>
+				</div>
+				<div class="col-lg-3 col-md-6 text-center">
+					<div class="service-box">
+						<i class="fa fa-4x fa-paper-plane-o wow bounceIn text-primary" data-wow-delay=".3s"></i>
+						<h3>Simpel & Schnell</h3>
+						<p class="text-muted">Mit wenigen Klicks einer Veranstalltung beitreten - ohne Registierung!</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+	<aside class="bg-dark">
+		<section id="contact">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-8 col-lg-offset-2 text-center">
+						<h2 class="section-heading">Let's Get In Touch!</h2>
+						<hr class="primary">
+						<p>Ready to start your next project with us? That's great! Give us a call or send us an email and we will get back to you as soon as possible!</p>
+					</div>
+					<div class="col-lg-4 col-lg-offset-2 text-center">
+						<i class="fa fa-phone fa-3x wow bounceIn"></i>
+						<p>123-456-6789</p>
+					</div>
+					<div class="col-lg-4 text-center">
+						<i class="fa fa-envelope-o fa-3x wow bounceIn" data-wow-delay=".1s"></i>
+						<p><a href="mailto:your-email@your-domain.com">feedback@startbootstrap.com</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+	</aside>
+
+
+	<div id="chatPage">
+		<nav id="mainNav" class="navbar navbar-default navbar-fixed-top">
+			<div class="container-fluid">
+				<!-- Brand and toggle get grouped for better mobile display -->
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand page-scroll" href="#page-top">Physik - Uni Mainz</a>
+				</div>
+
+
+
+
+				<!-- Collect the nav links, forms, and other content for toggling -->
+				<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+					<ul class="nav navbar-nav navbar-right">
+						<li>
+							<a class="page-scroll" href="#about"><i class="fa fa-download"></i></a>
+							<li>
+								<a class="page-scroll" href="#about">DE</a>
+							</li>
+							<li>
+								<a class="page-scroll" href="#services">EN</a>
+							</li>
+							<li>
+								<a class="page-scroll" href="#portfolio">ES</a>
+							</li>
+							<li>
+								<a class="page-scroll" href="#contact">FR</a>
+							</li>
+					</ul>
+				</div>
+				<!-- /.navbar-collapse -->
+			</div>
+			<!-- /.container-fluid -->
+		</nav>
+
+		<div class="row" id="main-chat-screen">
+			<div class="col-md-3">
+				<ul id="rooms" class="list-group"></ul>
+				<ul id="people" class="list-group"></ul>
+			</div>
+			<div class="col-md-6">
+				<div id="conversation">
+					<ul id="msgs" class="list-unstyled"></ul>
+
+				</div>
+				<form id="chatForm" class="form-inline">
+					<div class="form-group">
+						<input type="text" class="input-lg" placeholder="Your message" id="msg">
+						<input type="submit" name="send" id="send" value=">" class="btn btn-success btn-lg">
+					</div>
+
+
+				</form>
+			</div>
+			<div class="col-md-2">
+				<ul class="list-unstyled" id="updates"></ul>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal start
+<div class="modal fade" id="roomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomLabel" aria-hidden="true">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<h4 class="modal-title" id="createRoomLabel">Create room</h4>
+</div>
+<div class="modal-body">
+You can create a chat room here. Names have to be unique.
+<form class="form-inline" id="createRoomForm"><input type="text" class="form-control input-lg"  placeholder="Room name" id="createRoomName"></form>
+</div>
+<div class="modal-footer">
+<button type="button" class="btn btn-lg btn-default" data-dismiss="modal">Close</button>
+<button data-dismiss="modal" id="createRoomBtn" class="btn btn-success btn-lg">Create room</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal end -->
+
+	<script src="components/jquery/dist/jquery.js"></script>
+	<script src="components/bootstrap/dist/js/bootstrap.js"></script>
+	</div>
+
+	<!-- jQuery -->
+	<script src="js/jquery.js"></script>
+
+	<!-- Bootstrap Core JavaScript -->
+	<script src="js/bootstrap.min.js"></script>
+
+	<!-- Plugin JavaScript -->
+	<script src="js/jquery.easing.min.js"></script>
+	<script src="js/jquery.fittext.js"></script>
+	<script src="js/wow.min.js"></script>
+
+	<script src="js/picker.js"></script>
+	<script src="js/picker.date.js"></script>
+	<script src="js/picker.time.js"></script>
+
+	<!-- Custom Theme JavaScript -->
+	<script src="js/creative.js"></script>
+	<script src="js/client.js"></script>
 </body>
+
+
+
 </html>

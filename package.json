@@ -22,8 +22,6 @@
   "engines": {"node": "^0.12.7"},
   "devDependencies": {},
   "scripts": {
-    "install": "npm install", 
-    "start": "npm start"
   },
   "repository": {
     "type": "git",
