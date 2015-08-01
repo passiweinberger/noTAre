@@ -337,4 +337,14 @@ io.sockets.on("connection", function (socket) {
 			purge(socket, "leaveRoom");
 		}
 	});
+	/*
+	socket.on("whichRoom", function (id) {
+		var room = rooms[id];
+		if (room) {
+			socket.emit("yourRoom", room);
+		} else {
+			cket.emit("yourRoom", room);
+		}
+	});
+	*/
 });
