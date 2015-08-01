@@ -244,6 +244,9 @@ io.sockets.on("connection", function (socket) {
 
 	//Room functions
 	socket.on("createRoom", function (name) {
+		//if (people[socket.id] == undefined)
+
+
 		if (people[socket.id].inroom) {
 			socket.emit("update", "You are in a room. Please leave it first to create your own.");
 		} else if (!people[socket.id].owns) {

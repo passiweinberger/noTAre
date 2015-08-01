@@ -175,7 +175,7 @@ function redrawChat(messages) {
 		var pMessage = document.createElement("p");
 
 		pName.textContent = message.doc.name;
-		pMessage.textContent = msg.doc.message + '\n' + handlelink(msg.doc.message); //message.doc.message;
+		pMessage.textContent = message.doc.message + '\n' + handlelink(message.doc.message); //message.doc.message;
 		pName.className = "text-danger";
 
 		li.appendChild(pName);
