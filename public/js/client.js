@@ -362,7 +362,7 @@ $(document).ready(function () {
 
 	//enter screen
 	$("#usernameForm").submit(function () {
-		MyName = $("#username").val(); 
+		MyName = $("#username").val();
 		var device = "desktop";
 		if (navigator.userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile/i)) {
 			device = "mobile";
@@ -445,10 +445,6 @@ $(document).ready(function () {
 		} else {
 			$("#" + data.person + "").remove();
 		}
-	});
-
-	$("#showCreateRoom").click(function () {
-		$("#createRoomForm").toggle();
 	});
 
 	$("#createRoomButton").on('click', function () {
@@ -801,7 +797,8 @@ $(document).ready(function () {
 		id: 2
 	}];
 
-	//	var chatRoom = new Chat("", "", "", "" + new Date().getTime());
+
+	var chatRoom = new Chat("", "", "", "");
 
 	$(".createHierarchy").click(function () {
 
@@ -829,26 +826,33 @@ $(document).ready(function () {
 	socket.on("posOrgas", function (e) {
 
 		/*$("#dropDownContainer ul").html("");
-		elems.forEach(function (elem) {
+	,	elems.forEach(function (elem) {
 			if (elem.name.toLowerCase().contains(str)) {
 				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
 			}
 		});*/
 	});
 
+
+
+	var delay = (function () {
+		var timer = 0;
+		return function (callback, ms) {
+			clearTimeout(timer);
+			timer = setTimeout(callback, ms);
+		}
+	});
+
 	$(".middleInput").on('keyup', function (e) {
 
-		var str = $(this).val().toLowerCase();
-		//chatRoom.setOrg($(this).val());
-		console.log(str);
-		/*
-		
-		socket.emit("findOrganisation",str);
-			
-		*/
+		delay(function () {
+			var str = $(this).val().toLowerCase();
+			chatRoom.setOrg(str);
+			socket.emit("findOrganisation", str);
+			console.log(chatRoom);
+		}, 500)
 
-
-	});
+	}).timeout({});
 
 	// PICKADATE
 	$("#dob").pickadate({
