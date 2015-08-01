@@ -244,32 +244,32 @@ io.sockets.on("connection", function (socket) {
 
 	//Room functions
 	socket.on("createRoom", function (name) {
-		if (people[socket.id].inroom) {
-			socket.emit("update", "You are in a room. Please leave it first to create your own.");
-		} else if (!people[socket.id].owns) {
+		//if (people[socket.id].inroom) {
+		//	socket.emit("update", "You are in a room. Please leave it first to create your own.");
+		//} else if (!people[socket.id].owns) {
 
-			var id = uuid.v4();
-			var room = new Room(name, id, socket.id);
-			rooms[id] = room;
-			sizeRooms = _.size(rooms);
-			io.sockets.emit("roomList", {
-				rooms: rooms,
-				count: sizeRooms
-			});
-			//add room to socket, and auto join the creator of the room
-			socket.room = name;
-			socket.join(socket.room);
-			people[socket.id].owns = id;
-			people[socket.id].inroom = id;
-			room.addPerson(socket.id);
-			socket.emit("update", "Welcome to " + room.name + ".");
-			socket.emit("sendRoomID", {
-				id: id
-			});
-			chatHistory[socket.room] = [];
-		} else {
-			socket.emit("update", "You have already created a room.");
-		}
+		var id = uuid.v4();
+		var room = new Room(name, id, socket.id);
+		rooms[id] = room;
+		sizeRooms = _.size(rooms);
+		io.sockets.emit("roomList", {
+			rooms: rooms,
+			count: sizeRooms
+		});
+		//add room to socket, and auto join the creator of the room
+		socket.room = name;
+		socket.join(socket.room);
+			//people[socket.id].owns = id;
+		people[socket.id].inroom = id;
+		room.addPerson(socket.id);
+		socket.emit("update", "Willkommen in der Vorlesung " + room.name + "!");
+		socket.emit("sendRoomID", {
+			id: id
+		});
+		chatHistory[socket.room] = [];
+		//} else {
+		//	socket.emit("update", "You have already created a room.");
+		//}
 	});
 
 	socket.on("check", function (name, fn) {
@@ -293,7 +293,7 @@ io.sockets.on("connection", function (socket) {
 	});
 
 	// download files: TODO
-	//socket.on("download", function(room) {
+	//socket.on("download", function(roomID) {
 	//});
 
 	socket.on("joinRoom", function (id) {

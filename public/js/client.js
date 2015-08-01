@@ -516,6 +516,7 @@ $(document).ready(function () {
 
 	$("#download").click(function () {
 		// download from couchDB: TODO
+		// socket.emit('download', myRoomID);
 		downloadMessages(myRoomID);
 	});
 
