@@ -1,24 +1,55 @@
-/*#login-screen, #main-chat-screen {
-  padding-top: 10px;
-}
-.main {
-  padding-top: 10px;
-  text-align: center;
-}
-#conversation {
-  font-size: 18px;
-  margin: 0px;
-  height: 300px;
-  overflow: scroll;
-}
-.final {
-  font-color: #000;
-}
-.interim {
-  font-color: #f00;
-}
-*/
-
 #chatPage {
 	display: none;
+}
+
+#login-screen,
+#main-chat-screen {
+	height: 100%;
+}
+
+.main {
+	padding-top: 10px;
+	text-align: center;
+	color: #f05f40;
+}
+
+#conversation {
+	font-size: 18px;
+	margin: 0px;
+	height: 100%;
+	min-height: 10em;
+	overflow: scroll;
+	background: #222;
+}
+
+.final {
+	font-color: #000;
+}
+
+.interim {
+	font-color: #f00;
+}
+
+#footer {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
+	
+	height: 100px;
+	background-color: #f5f5f5;
+}
+
+.main-head {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	/* Set the fixed height of the footer here */
+	
+	height: 100px;
+	background-color: #f5f5f5;
+}
+
+#msg {
+	ttwidth: 100%;
 }
