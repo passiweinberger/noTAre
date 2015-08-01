@@ -12,6 +12,7 @@
 #login-screen,
 #main-chat-screen {
 	height: 100%;
+	width: 100%
 }
 
 .main {

@@ -439,7 +439,8 @@ $(document).ready(function () {
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
 		var roomName = $("#createRoomName").val(); //"abfddf_test1c";
-		$("#yourRoomName").innerHTML = roomName; // Display roomName in Chat
+		//$("#yourRoomName").innerHTML = roomName; // Display roomName in Chat
+		document.getElementById("yourRoomName").innerHTML = roomName;
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
 			if (roomExists) {
