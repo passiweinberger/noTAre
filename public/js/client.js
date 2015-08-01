@@ -372,7 +372,7 @@ $(document).ready(function () {
 
 	//enter screen
 	$("#usernameForm").submit(function () {
-		MyName = $("#username").val(); 
+		MyName = $("#username").val();
 		var device = "desktop";
 		if (navigator.userAgent.match(/Android|BlackBerry|iPhone|iPad|iPod|Opera Mini|IEMobile/i)) {
 			device = "mobile";
@@ -457,10 +457,6 @@ $(document).ready(function () {
 		}
 	});
 
-	//$("#showCreateRoom").click(function () {
-	//	$("#createRoomForm").toggle();
-	//});
-
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
 		var roomName = $("#createRoomName").val(); //"abfddf_test1c";
@@ -511,14 +507,14 @@ $(document).ready(function () {
 		socket.emit("joinRoom", roomID);
 	});*/
 
-/*
-	$("#rooms").on('click', '.removeRoomBtn', function () {
-		var roomName = $(this).siblings("span").text();
-		var roomID = $(this).attr("id");
-		socket.emit("removeRoom", roomID);
-		$("#createRoom").show();
-	});
-*/
+	/*
+		$("#rooms").on('click', '.removeRoomBtn', function () {
+			var roomName = $(this).siblings("span").text();
+			var roomID = $(this).attr("id");
+			socket.emit("removeRoom", roomID);
+			$("#createRoom").show();
+		});
+	*/
 
 	$("#leave").click(function () {
 		socket.emit("leaveRoom", roomName);
@@ -812,7 +808,8 @@ $(document).ready(function () {
 		id: 2
 	}];
 
-	//	var chatRoom = new Chat("", "", "", "" + new Date().getTime());
+
+	var chatRoom = new Chat("", "", "", "");
 
 	$(".createHierarchy").click(function () {
 
@@ -836,20 +833,37 @@ $(document).ready(function () {
 		$(this).prev().focus();
 	});
 
-	$(".middleInput").on('keyup', function (e) {
 
-		var str = $(this).val().toLowerCase();
-		//chatRoom.setOrg($(this).val());
-		console.log(str);
+	socket.on("posOrgas", function (e) {
 
-
-		$("#dropDownContainer ul").html("");
-		elems.forEach(function (elem) {
+		/*$("#dropDownContainer ul").html("");
+	,	elems.forEach(function (elem) {
 			if (elem.name.toLowerCase().contains(str)) {
 				$("#dropDownContainer ul").append("<li class='list-group-item'>" + elem.name + "</li>");
 			}
-		});
+		});*/
 	});
+
+
+
+	var delay = (function () {
+		var timer = 0;
+		return function (callback, ms) {
+			clearTimeout(timer);
+			timer = setTimeout(callback, ms);
+		}
+	});
+
+	$(".middleInput").on('keyup', function (e) {
+
+		delay(function () {
+			var str = $(this).val().toLowerCase();
+			chatRoom.setOrg(str);
+			socket.emit("findOrganisation", str);
+			console.log(chatRoom);
+		}, 500)
+
+	}).timeout({});
 
 	// PICKADATE
 	$("#dob").pickadate({
