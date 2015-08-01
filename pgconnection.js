@@ -140,8 +140,8 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
             console.log(qry);
             var query = client.query(qry, function(err, result) {
                 if (err) { console.log("PGCONN: Error running query: " + err); }
-                console.log(">" + qry + "\n>>");
-                console.log(result);
+                //console.log(">" + qry + "\n>>");
+                //console.log(result);
                 _parse(table, result, obj, callback);
                 done();
             });

@@ -845,8 +845,8 @@ $(document).ready(function () {
 	})();
 
 	$(".middleInput").on('keyup', function (e) {
-		delay(function () {
-			var str = $(".middleInput").val().toLowerCase();
+		/*delay(function () {
+			var str = $(".middleInput").val();
 
 			if(chatRoom.org == ""){
 				chatRoom.setOrg(str);
@@ -857,7 +857,18 @@ $(document).ready(function () {
 				socket.emit("findCourse", chatRoom);
 			}
 			
-		}, 500)
+		}, 500)*/
+
+		var str = $(".middleInput").val();
+
+			if(chatRoom.org == ""){
+				chatRoom.setOrg(str);
+				socket.emit("findOrganization", chatRoom);
+			}
+			else if(chatRoom.course == ""){
+				chatRoom.setCourse(str);
+				socket.emit("findCourse", chatRoom);
+			}
 
 	});
 
