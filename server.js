@@ -1,24 +1,19 @@
 var express = require('express'),
 	app = express(),
-	http = require('http').Server(app) // .createServer(app)
-	,
-	io = require('socket.io')(http) // .listen(http)
-	,
+	http = require('http').Server(app), // .createServer(app)
+	io = require('socket.io')(http), // .listen(http)
 	npid = require("npid"),
 	uuid = require('node-uuid'),
-	Room = require('./room.js'),
-	Chat = require('./public/js/Chat.js'),
-	PgConnection = require('./pgconnection.js'),
+	Room = require('serverJS/room.js'),
+	Chat = require('serverJS/Chat.js'),
+	PgConnection = require('serverJS/pgconnection.js'),
 	pgConn = new PgConnection(),
 	//, cfEnv = require("cf-env")
-	//,
 	_ = require('underscore')._;
 
 app.configure(function () {
 	app.set('port', process.env.PORT || 3000); // process.env.CF_INSTANCE_PORT
-	// app.set('ipaddr', process.env.VCAP_APP_HOST || "127.0.0.1"); // process.env.CF_INSTANCE_IP
-	// console.log('Apps IP Adress: ' + app.get('ipaddr'));
-	// console.log('Apps PORT: ' + app.get('port'));
+	app.set('ipaddr', process.env.VCAP_APP_HOST || "127.0.0.1"); // process.env.CF_INSTANCE_IP
 	pgConn.setup();
 	app.use(express.bodyParser());
 	app.use(express.methodOverride());
@@ -38,7 +33,6 @@ app.get('/', function (req, res) {
 
 /*var pgConn = new PgConnection();
 
-var Chat = module.require('./Chat.js');
 var chatRoom = new Chat("Mainz", "Hac", "P", "" + new Date().getTime());
 
 console.log(pgConn.find(pgConn.tables.ORGANIZATION, chatRoom));

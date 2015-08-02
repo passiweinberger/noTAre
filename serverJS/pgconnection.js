@@ -16,16 +16,27 @@ var PgConnection = (function () {
         tutor        : 'id serial NOT NULL PRIMARY KEY, course_id int NOT NULL REFERENCES course (id), name character varying NOT NULL, UNIQUE (course_id, name)',
         chat         : 'id serial NOT NULL PRIMARY KEY, tutor_id int NOT NULL REFERENCES tutor (id), start_time timestamp with time zone NOT NULL, UNIQUE (tutor_id, start_time)',
         logs         : 'id serial NOT NULL PRIMARY KEY, chat_id int NOT NULL REFERENCES chat (id), language CHARACTER(3) NOT NULL, data BYTEA NOT NULL, UNIQUE (chat_id, language, data)'
-    }
+    };
     if (process.env.VCAP_SERVICES) {
       var env = JSON.parse(process.env.VCAP_SERVICES);
       var credentials = env['postgresql-9.1'][0]['credentials'];
-      console.log("PGCONN: using ENV VCAP_SERVICES")
+      console.log("PGCONN: using ENV VCAP_SERVICES");
     } else {
-      var pg_pass = process.env.PG_PASSWORD // SET ENV VARIABLE: PG_PASWORD
-      console.log("PGCONN: using ENV PG_PASSWORD")
-      var credentials = {"uri":"postgre://postgres:"+pg_pass+"@localhost:5432/chat"}
+      var pg_pass = process.env.PG_PASSWORD // SET ENV VARIABLE: PG_PASSWORD
+      var credentials = {"uri":"postgre://postgres:"+pg_pass+"@localhost:5432"};
+      console.log("PGCONN: using ENV PG_PASSWORD");
     }
+    // TODO: Do not hardcode!
+    var credentials = {
+        "name": "d907dffef42a841c38ed614b74dfa1222",
+        "host": "198.11.228.49",
+        "hostname": "198.11.228.49",
+        "port": 5433,
+        "user": "u58582e3d10e64b77b9fb592716fa5f0b",
+        "username": "u58582e3d10e64b77b9fb592716fa5f0b",
+        "password": "p6224abe03188461991371520ff4dc304",
+        "uri": "postgres://u58582e3d10e64b77b9fb592716fa5f0b:p6224abe03188461991371520ff4dc304@198.11.228.49:5433/d907dffef42a841c38ed614b74dfa1222"
+      };
 
 // --------------- methods -------------
 
@@ -136,7 +147,7 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
 // -------------- helper functions ----------------
 
     var _doQuery = function _doQuery(qry, table, obj, callback) {
-        pg.connect(credentials.uri, function(err, client, done) {
+        pg.connect(credentials.uri + '/notare', function(err, client, done) {
             console.log(qry);
             var query = client.query(qry, function(err, result) {
                 if (err) { console.log("PGCONN: Error running query: " + err); }
