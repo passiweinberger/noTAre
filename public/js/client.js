@@ -8,9 +8,14 @@ var final_transcript = '';
 var recognizing = false;
 var lastmessages = []; // to be populated later
 var db, remoteCouch;
-var roomName;
 var joining = true;
-//var roomName = getUrlParameter("roomID");
+// Invited?
+//var roomName;
+var roomName = getUrlParameter("roomID");
+if (roomName) {
+	joining = false;
+}
+
 var MyName;
 //IMPORTANT: CONFIGURE remoteCouch with your own details
 var cloudant_url = "https://64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix:913734c81dfef3dc517d303f0ede2aaf995d6e6e8df08aeeb5438b41ffc8912d@64abe65d-f33f-4b7d-bec3-7f3b3de2eb47-bluemix.cloudant.com/";
@@ -35,12 +40,12 @@ var getUrlParameter = function getUrlParameter(sParam) {
 };
 
 function makeCouchDB(roomName) {
-	db = new PouchDB('' + roomName);
+	db = new PouchDB(roomName);
 	remoteCouch = cloudant_url + roomName;
 	db.info(function (err, info) {
 		///*
 		db.changes({
-			since: info.update_seq,
+			//since: info.update_seq,
 			continuous: true,
 			live: true,
 			onChange: readMessages
@@ -53,11 +58,6 @@ function makeCouchDB(roomName) {
 	}
 }
 
-function syncError() {
-	console.log('data-sync-error');
-	syncDom.setAttribute('data-sync-state', 'error');
-}
-
 function sync() {
 	syncDom.setAttribute('data-sync-state', 'syncing');
 	var opts = {
@@ -68,10 +68,13 @@ function sync() {
 	db.replicate.to(remoteCouch, opts);
 	db.replicate.from(remoteCouch, opts);
 }
-
 function completeHandlerCBD() {
-	console.log('sync succesful!');
+	console.log('data-sync succesful!');
 	syncDom.setAttribute('data-sync-state', 'success');
+}
+function syncError() {
+	console.log('data-sync error!');
+	syncDom.setAttribute('data-sync-state', 'error');
 }
 
 function exportToCsv(filename, rows) {
@@ -120,7 +123,7 @@ function exportToCsv(filename, rows) {
 function downloadMessages(roomName) {
 	db.allDocs({
 		include_docs: true,
-		descending: true
+		descending: false
 	}, function (err, doc) {
 		if (!err) {
 			var filename = '' + roomName + '.csv';
@@ -153,14 +156,14 @@ function redrawChat(messages) {
 	ul.innerHTML = '';
 	messages.forEach(function (message) {
 		var li = document.createElement("li");
-		var pName = document.createElement("p");
+		//var pName = document.createElement("p");
 		var pMessage = document.createElement("p");
 
-		pName.textContent = message.doc.name;
-		pMessage.textContent = message.doc.message + '\n' + handlelink(message.doc.message); //message.doc.message;
+		//pName.textContent = message.doc.name;
+		pMessage.textContent = message.doc.name + ': ' + message.doc.message + '\n' + handlelink(message.doc.message); //message.doc.message;
 		pName.className = "text-danger";
 
-		li.appendChild(pName);
+		//li.appendChild(pName);
 		li.appendChild(pMessage);
 		li.className = "list-group-item";
 		ul.appendChild(li);
@@ -176,20 +179,33 @@ function translateMsgs(messages, language) {
 	ul.innerHTML = '';
 	messages.forEach(function (message) {
 		var li = document.createElement("li");
-		var pName = document.createElement("p");
+		//var pName = document.createElement("p");
 		var pMessage = document.createElement("p");
 
-		pName.textContent = message.doc.name;
+		//pName.textContent = message.doc.name;
 		translated_msg = translate(language, message.doc.message);
-		pMessage.textContent = translated_msg + '\n' + handlelink(translated_msg); //translated_msg
+		pMessage.textContent = message.doc.name + ': ' + translated_msg + '\n' + handlelink(translated_msg); //translated_msg
 		pName.className = "text-danger";
 
-		li.appendChild(pName);
+		//li.appendChild(pName);
 		li.appendChild(pMessage);
 		li.className = "list-group-item";
 		ul.appendChild(li);
 		if (suggest_wiki) {
 			suggest_Wiki(messages);
+		}
+	});
+}
+
+function translateTo(lang) {
+	db.allDocs({
+		include_docs: true,
+		descending: true
+	}, function (err, doc) {
+		if (!err) {
+			translateMsgs(messages, lang);
+		} else {
+			console.log(err);
 		}
 	});
 }
@@ -215,11 +231,11 @@ if (!('webkitSpeechRecognition' in window)) {
 				$('#msg').removeClass("interim");
 			} else {
 				interim_transcript += event.results[i][0].transcript;
-				/* For intermediate results
+				///* For intermediate results
 				uses $("#msg").val(interim_transcript);
 				$('#msg').addClass("interim");
 				$('#msg').removeClass("final");
-				*/
+				//*/
 			}
 		}
 		$("#msg").val(final_transcript);
@@ -238,7 +254,6 @@ function startButton(event) {
 		recognition.lang = "en-GB"
 		recognition.start();
 		$("#start_button").prop("value", "Nimmt auf... Drücke um es zu stoppen!");
-		// $("#msg").val(final_transcript);
 		$("#msg").val(final_transcript);
 	}
 
@@ -248,7 +263,8 @@ function startButton(event) {
 Functions
 */
 function toggleNameForm() {
-	$("#userModal").toggle();
+	//$("#userModal").toggle();
+	$('#userModal').modal('hide');
 }
 
 function toggleChatWindow() {
@@ -324,8 +340,8 @@ $(document).ready(function () {
 		$("#main-chat-screen").show();
 		socket.emit("joinRoom", roomName);
 		//TODO: Ask for Username TODO
-		//$('#userModal').modal('show');
-		//$("#username").focus();
+		$('#userModal').modal('show');
+		$("#username").focus();
 	}
 
 
@@ -438,8 +454,7 @@ $(document).ready(function () {
 
 	$("#createRoomButton").on('click', function () {
 		var roomExists = false;
-		var roomName = $("#createRoomName").val(); //"abfddf_test1c";
-		//$("#yourRoomName").innerHTML = roomName; // Display roomName in Chat
+		var roomName = $("#createRoomName").val();
 		document.getElementById("yourRoomName").innerHTML = roomName;
 		socket.emit("check", roomName, function (data) {
 			roomExists = data.result;
@@ -448,19 +463,16 @@ $(document).ready(function () {
 				$("#errors").show();
 				$("#errors").append("Die Vorlesung <i>" + roomName + "</i> läuft bereits! Husch, Husch, Hinein!");
 			} else {
-				if (roomName.length > 0) { //also check for roomname
+				if (roomName.length > 0) { //also check for roomName
 					joining = false;
-
 					makeCouchDB(roomName);
 					socket.emit("createRoom", roomName);
 					$("#errors").empty();
 					$("#errors").hide();
-
 					$("body").children().hide();
 					$("#chatPage").show();
 					$("#main-chat-screen").show();
-					//$('#userModal').modal('show');
-
+					$('#userModal').modal('show');
 				}
 			}
 		});
@@ -501,6 +513,7 @@ $(document).ready(function () {
 
 	$("#leave").click(function () {
 		socket.emit("leaveRoom", roomName);
+		document.getElementById("yourRoomName").innerHTML = 'NOTARE';
 		$("#createRoom").show();
 	});
 
@@ -510,86 +523,25 @@ $(document).ready(function () {
 		downloadMessages(roomName);
 	});
 
-// TRANSLATIONS: TODO
+// TRANSLATIONS:
 	$("#translate_en").click(function () {
-		db.allDocs({
-			include_docs: true,
-			descending: true
-		}, function (err, doc) {
-			if (!err) {
-				translateMsgs(messages, 'en');
-			} else {
-				console.log(err);
-			}
-		});
+		translateTo('en');
 	});
-
 	$("#translate_it").click(function () {
-		db.allDocs({
-			include_docs: true,
-			descending: true
-		}, function (err, doc) {
-			if (!err) {
-				translateMsgs(messages, 'it');
-			} else {
-				console.log(err);
-			}
-		});
+		translateTo('it');
 	});
-
 	$("#translate_ru").click(function () {
-		db.allDocs({
-			include_docs: true,
-			descending: true
-		}, function (err, doc) {
-			if (!err) {
-				translateMsgs(messages, 'ru');
-			} else {
-				console.log(err);
-			}
-		});
+		translateTo('ru');
 	});
-
-
 	$("#translate_es").click(function () {
-		db.allDocs({
-			include_docs: true,
-			descending: true
-		}, function (err, doc) {
-			if (!err) {
-				translateMsgs(messages, 'es');
-			} else {
-				console.log(err);
-			}
-		});
+		translateTo('es');
 	});
-
 	$("#translate_fr").click(function () {
-		db.allDocs({
-			include_docs: true,
-			descending: true
-		}, function (err, doc) {
-			if (!err) {
-				translateMsgs(messages, 'fr');
-			} else {
-				console.log(err);
-			}
-		});
+		translateTo('fr');
 	});
-
 	$("#translate_de").click(function () {
-		db.allDocs({
-			include_docs: true,
-			descending: true
-		}, function (err, doc) {
-			if (!err) {
-				translateMsgs(messages, 'de');
-			} else {
-				console.log(err);
-			}
-		});
+		translateTo('de');
 	});
-
 // TRANSLATIONS END
 
 	$("#people").on('click', '.whisper', function () {
@@ -704,7 +656,7 @@ $(document).ready(function () {
 	});
 
 	socket.on("update-people", function (data) {
-		//var peopleOnline = [];
+		var peopleOnline = [];
 		$("#people").empty();
 		$('#people').append("<li class=\"list-group-item active\">Kommolitonen online: <span class=\"badge\">" + data.count + "</span></li>");
 		$.each(data.people, function (a, obj) {
@@ -714,7 +666,7 @@ $(document).ready(function () {
 				html = "<img class=\"flag flag-" + obj.country + "\"/>";
 			}
 			$('#people').append("<li class=\"list-group-item\"><span>" + obj.name + "</span> <i class=\"fa fa-" + obj.device + "\"></i> " + html + " <a href=\"#\" class=\"whisper btn btn-xs\">whisper</a></li>");
-			//peopleOnline.push(obj.name);
+			peopleOnline.push(obj.name);
 		});
 
 		///*
@@ -752,7 +704,6 @@ $(document).ready(function () {
 		$("#rooms").append("<li class=\"list-group-item active\">Liste von Vorlesungen: <span class=\"badge\">" + data.count + "</span></li>");
 		if (!jQuery.isEmptyObject(data.rooms)) {
 			$.each(data.rooms, function (id, room) {
-				var html = "<button id=" + id + " class='joinRoomBtn btn btn-default btn-xs' >Join</button>" + " " + "<button id=" + id + " class='removeRoomBtn btn btn-default btn-xs'>Remove</button>";
 				$('#rooms').append("<li id=" + id + " class=\"list-group-item\"><span>" + room.name + "</span> " + html + "</li>");
 			});
 		} else {

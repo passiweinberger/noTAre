@@ -15,7 +15,7 @@ Chat.prototype.setTutor = function(tutor) {
   this.tutor = tutor;
 };
 Chat.prototype.setStartTime = function(start_time) {
-  this.org = start_time;
+  this.start_time = start_time;
 };
 
 module.exports = Chat;

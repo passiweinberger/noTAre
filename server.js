@@ -61,8 +61,8 @@ var chatHistory = {};
 function purge(s, action) {
 	if (people[s.id].inroom) { //user is in a room
 		var room = rooms[people[s.id].inroom]; //check which room user is in.
-		if (action === "disconnect") {
-			io.sockets.emit("update", people[s.id].name + " has disconnected from the server.");
+		if (action === "disconnect") { // leaves the entire platform
+			io.sockets.emit("update", people[s.id].name + " hat die Vorlesung verlassen!");
 			if (_.contains((room.people), s.id)) {
 				var personIndex = room.people.indexOf(s.id);
 				room.people.splice(personIndex, 1);
@@ -78,20 +78,19 @@ function purge(s, action) {
 				'id': s.id
 			});
 			sockets = _.without(sockets, o);
-		} else if (action === "leaveRoom") {
+		} else if (action === "leaveRoom") { // leaves only the current lecture
 			if (_.contains((room.people), s.id)) {
 				var personIndex = room.people.indexOf(s.id);
 				room.people.splice(personIndex, 1);
 				people[s.id].inroom = null;
-				io.sockets.emit("update", people[s.id].name + " has left the room.");
+				io.sockets.emit("update", people[s.id].name + " hat die Vorlesung verlassen!");
 				s.leave(room.name);
 			}
 		}
-		if (room.people.length === 0) { // cleanup when last one goes:
-			delete rooms[people[s.id].owns]; // delete room
-			people[s.id].owns = null; // owner looses room
+		if (room.people.length === 1) { // cleanup when last one goes:
 			room.people = _.without(room.people, s.id); // remove people from the room:people{}collection
-			delete chatHistory[room.name]; // delete the chat history
+			delete chatHistory[room.name]; // delete the chat history cache
+			delete room; // delete room
 			sizePeople = _.size(people);
 			sizeRooms = _.size(rooms);
 			io.sockets.emit("update-people", {
@@ -106,7 +105,7 @@ function purge(s, action) {
 	} else {
 		//The user isn't in a room, but maybe he just disconnected, handle the scenario:
 		if (action === "disconnect") {
-			io.sockets.emit("update", people[s.id].name + " has disconnected from the server.");
+			io.sockets.emit("update", people[s.id].name + " hat jetzt Feierabend :)");
 			delete people[s.id];
 			sizePeople = _.size(people);
 			io.sockets.emit("update-people", {
@@ -126,7 +125,6 @@ io.sockets.on("connection", function (socket) {
 
 	socket.on("joinserver", function (name, device) {
 		var exists = false;
-		var ownerRoomID = inRoomID = null;
 
 		_.find(people, function (key, value) {
 			if (key.name.toLowerCase() === name.toLowerCase()) {
@@ -153,7 +151,6 @@ io.sockets.on("connection", function (socket) {
 		} else {
 			people[socket.id] = {
 				"name": name,
-				"owns": ownerRoomID,
 				"inroom": inRoomID,
 				"device": device
 			};
@@ -330,11 +327,11 @@ io.sockets.on("connection", function (socket) {
 	//Room functions
 	socket.on("createRoom", function (name) {
 
-		//if (people[socket.id].inroom) {
-		//	socket.emit("update", "You are in a room. Please leave it first to create your own.");
-		//} else if (!people[socket.id].owns) {
+		if (people[socket.id].inroom) {
+			socket.emit("update", "Du bist noch in einer Vorlesung! Bitte Verlasse diese zuerst:" + _.contains((room.people), socket.id));
+		}
 		var id = uuid.v4();
-		var room = new Room(name, id, socket.id);
+		var room = new Room(name, id);
 		rooms[id] = room;
 		sizeRooms = _.size(rooms);
 		io.sockets.emit("roomList", {
@@ -344,7 +341,6 @@ io.sockets.on("connection", function (socket) {
 		//add room to socket, and auto join the creator of the room
 		socket.room = name;
 		socket.join(socket.room);
-		//people[socket.id].owns = id;
 		people[socket.id].inroom = id;
 		room.addPerson(socket.id);
 		socket.emit("update", "Willkommen in der Vorlesung " + room.name + "!");
@@ -352,9 +348,6 @@ io.sockets.on("connection", function (socket) {
 			id: id
 		});
 		chatHistory[socket.room] = [];
-		//} else {
-		//	socket.emit("update", "You have already created a room.");
-		//}
 	});
 
 	socket.on("check", function (name, fn) {
@@ -368,15 +361,6 @@ io.sockets.on("connection", function (socket) {
 		});
 	});
 
-	socket.on("removeRoom", function (id) {
-		var room = rooms[id];
-		if (socket.id === room.owner) {
-			purge(socket, "removeRoom");
-		} else {
-			socket.emit("update", "Only the owner can remove a room.");
-		}
-	});
-
 	// download files: TODO
 	//socket.on('download', function(roomID) {
 	//});
@@ -384,9 +368,6 @@ io.sockets.on("connection", function (socket) {
 	socket.on("joinRoom", function (id) {
 		if (typeof people[socket.id] !== "undefined") {
 			var room = rooms[id];
-			if (socket.id === room.owner) {
-				socket.emit("update", "You are the maker of this room and you have already been joined.");
-			} else {
 				if (_.contains((room.people), socket.id)) {
 					socket.emit("update", "You have already joined this room.");
 				} else {
@@ -398,8 +379,8 @@ io.sockets.on("connection", function (socket) {
 						socket.room = room.name;
 						socket.join(socket.room);
 						user = people[socket.id];
-						io.sockets.in(socket.room).emit("update", user.name + " has connected to " + room.name + " room.");
-						socket.emit("update", "Welcome to " + room.name + ".");
+						io.sockets.in(socket.room).emit("update", user.name + " hat die Vorlesung " + room.name + " betreten!");
+						socket.emit("update", "Willkommen in " + room.name + "!");
 						socket.emit("sendRoomID", {
 							id: id
 						});
@@ -409,9 +390,8 @@ io.sockets.on("connection", function (socket) {
 						}
 					}
 				}
-			}
 		} else {
-			socket.emit("update", "Please enter a valid name first.");
+			socket.emit("update", "Bitte gebe zunächst einen gültigen username ein!");
 		}
 	});
 
@@ -427,7 +407,7 @@ io.sockets.on("connection", function (socket) {
 		if (room) {
 			socket.emit("yourRoom", room);
 		} else {
-			cket.emit("yourRoom", room);
+			socket.emit("yourRoom", false);
 		}
 	});
 	*/

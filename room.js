@@ -1,7 +1,6 @@
-function Room(name, id, owner) {
+function Room(name, id) {
   this.name = name;
   this.id = id;
-  this.owner = owner;
   this.people = [];
   this.peopleLimit = 999999;
   this.status = "available";
