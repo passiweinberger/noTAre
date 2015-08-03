@@ -26,17 +26,6 @@ var PgConnection = (function () {
       var credentials = {"uri":"postgre://postgres:"+pg_pass+"@localhost:5432"};
       console.log("PGCONN: using ENV PG_PASSWORD");
     }
-    // TODO: Do not hardcode!
-    var credentials = {
-        "name": "d907dffef42a841c38ed614b74dfa1222",
-        "host": "198.11.228.49",
-        "hostname": "198.11.228.49",
-        "port": 5433,
-        "user": "u58582e3d10e64b77b9fb592716fa5f0b",
-        "username": "u58582e3d10e64b77b9fb592716fa5f0b",
-        "password": "p6224abe03188461991371520ff4dc304",
-        "uri": "postgres://u58582e3d10e64b77b9fb592716fa5f0b:p6224abe03188461991371520ff4dc304@198.11.228.49:5433/d907dffef42a841c38ed614b74dfa1222"
-      };
 
 // --------------- methods -------------
 
@@ -147,7 +136,7 @@ SELECT * FROM logs WHERE language = '000' AND chat_id =
 // -------------- helper functions ----------------
 
     var _doQuery = function _doQuery(qry, table, obj, callback) {
-        pg.connect(credentials.uri + '/notare', function(err, client, done) {
+        pg.connect(credentials.uri, function(err, client, done) {
             console.log(qry);
             var query = client.query(qry, function(err, result) {
                 if (err) { console.log("PGCONN: Error running query: " + err); }

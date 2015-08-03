@@ -232,9 +232,9 @@ if (!('webkitSpeechRecognition' in window)) {
 			} else {
 				interim_transcript += event.results[i][0].transcript;
 				///* For intermediate results
-				;uses $("#msg").val(interim_transcript);
-				$('#msg').addClass("interim");
-				$('#msg').removeClass("final");
+				//;uses $("#msg").val(interim_transcript);
+				//$('#msg').addClass("interim");
+				//$('#msg').removeClass("final");
 				//*/
 			}
 		}
